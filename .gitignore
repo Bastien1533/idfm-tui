@@ -1,0 +1,8 @@
+main
+*.o
+.serena
+.vscode
+.DS_Store
+data/**/*.txt
+data/**/*.csv
+*.pyc
