@@ -1,29 +1,71 @@
 #include "utils/csv.h"
+#include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
 
-char **parse_csv_line(char *line, size_t *out_cols, const char delimiter)
+char **parse_csv_line(char *line, size_t *out_cols, const char delimiter,
+                      long col_count_i)
 {
         line[strcspn(line, "\r\n")] = '\0';
         char delim_str[2] = { delimiter, '\0' };
 
         size_t col_count = 0;
-        char *temp = line;
-        while (*temp)
-                if (*temp++ == delimiter)
-                        ++col_count;
-        col_count++; // One more column that there is of ;
+        if (col_count_i == -1) {
+                char *temp = line;
+                while (*temp)
+                        if (*temp++ == delimiter)
+                                ++col_count;
+                col_count++;
+        } else {
+                col_count = col_count_i;
+        }
 
         char **parsed_line = malloc(sizeof(char *) * col_count);
 
+        unsigned char *p = (unsigned char *)line;
+        if (p[0] == 0xEF && p[1] == 0xBB && p[2] == 0xBF)
+                line += 3; // skip UTF-8 BOM
+
         char *curr = line;
-        char *tok;
+        char *field_start_c = NULL;
+        size_t field_len = 0;
+        bool in_quotes = false;
+
         size_t i = 0;
-        while ((tok = strsep(&curr, delim_str)) != NULL && i < col_count) {
-                parsed_line[i] = strdup(tok);
-                i++;
+        while (*curr != '\0') {
+                char c = *curr;
+                if (c == '\r' || c == '\n')
+                        break;
+                if (c == '"') {
+                        if (in_quotes && *(curr + 1) == '"') {
+                                field_len++;
+                                curr++;
+                        } else
+                                in_quotes = !in_quotes;
+                } else if (c == ',' && !in_quotes) {
+                        char *tok = malloc(field_len + 1);
+                        memcpy(tok, field_start_c, field_len);
+                        tok[field_len] = '\0';
+                        parsed_line[i] = tok;
+                        field_start_c = NULL;
+                        field_len = 0;
+                        i++;
+                } else {
+                        if (field_start_c == NULL)
+                                field_start_c = curr;
+                        field_len++;
+                }
+                curr++;
         }
+        char *tok = malloc(field_len + 1);
+        memcpy(tok, field_start_c, field_len);
+        tok[field_len] = '\0';
+        parsed_line[i] = tok;
+        field_start_c = NULL;
+        field_len = 0;
+
         if (out_cols != NULL) {
                 *out_cols = col_count;
         }
@@ -65,10 +107,10 @@ csv_file *read_csv_file(const char *filename, const char delimiter)
                 while (fgets(buf, sizeof(buf), fp) != NULL) {
                         if (line_idx == 0) {
                                 header = parse_csv_line(buf, &col_count,
-                                                        delimiter);
+                                                        delimiter, -1);
                         } else {
                                 rows[line_idx - 1] = parse_csv_line(
-                                        buf, &col_count, delimiter);
+                                        buf, NULL, delimiter, col_count);
                         }
                         line_idx++;
                 }
