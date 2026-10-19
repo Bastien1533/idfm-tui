@@ -17,8 +17,8 @@ ui_popup *create_route_popup(scene_t *scene, struct route *route)
         popup->id = strdup("Route Popup");
 
         char *title;
-        int stat = asprintf(&title, "Info for Route: %s (%s)", route->route_short_name,
-                            route->route_id);
+        int stat = asprintf(&title, "Info for Route: %s (%s)",
+                            route->route_short_name, route->route_id);
         if (stat == -1) {
                 free(popup->id);
                 free(popup);
@@ -56,8 +56,9 @@ ui_popup *create_route_popup(scene_t *scene, struct route *route)
                 struct stop *s = route->end_stops[i];
                 char *line;
                 asprintf(&line, "%s", s->stop_name);
-                ncplane_putstr_yx(plane, 5 + (i+ 1),
-                                  width / 2 - ncstrwidth(line, NULL, NULL) / 2, line);
+                ncplane_putstr_yx(plane, 5 + (i + 1),
+                                  width / 2 - ncstrwidth(line, NULL, NULL) / 2,
+                                  line);
         }
 
         return popup;

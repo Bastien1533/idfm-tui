@@ -162,14 +162,15 @@ static void show_stop_popup(scene_t *scene, char *stop_id,
 }
 
 static void show_route_popup(scene_t *scene, char *route_id,
-                            struct raptor_itinerary *itinerary)
+                             struct raptor_itinerary *itinerary)
 {
         if (scene == NULL || route_id == NULL || itinerary == NULL)
                 return;
         for (size_t i = 0; i < itinerary->n_legs; i++) {
                 struct raptor_leg *leg = itinerary->legs[i];
-                if (leg == NULL || leg->trip == NULL || leg->trip->route == NULL)
-                    continue; 
+                if (leg == NULL || leg->trip == NULL ||
+                    leg->trip->route == NULL)
+                        continue;
                 if (strcmp(leg->trip->route->route_id, route_id) == 0) {
                         create_route_popup(scene, leg->trip->route);
                         return;
