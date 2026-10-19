@@ -86,6 +86,9 @@ struct shape_seq {
 struct shape {
         char *shape_id;
         struct shape_seq **points;
+        size_t points_n;
+
+        struct route *route;
 };
 
 struct trip {
@@ -157,6 +160,9 @@ struct trip **get_trips_from_csv(csv_file *csv, size_t *n_trips,
 struct stop_time **get_stop_times_from_csv(csv_file *csv, size_t *n_stop_times,
                                            struct hash_map *trip_map,
                                            struct hash_map *stop_map);
+struct shape **get_shapes_from_csv(csv_file *csv, size_t *n_shapes);
+void associate_shape_route(struct trip **trips, size_t n_trips,
+                           struct hash_map *shape_map);
 
 void populate_stop_routes(struct stop_time **stop_times, size_t stop_times_n,
                           struct stop **stops, size_t stops_n);
@@ -171,6 +177,7 @@ struct hash_map *stops_to_map(struct stop **stops, size_t *n_stops);
 struct hash_map *transfers_to_map(struct transfer **transfers,
                                   size_t *n_transfers);
 struct hash_map *pathways_to_map(struct pathway **pathways, size_t *n_pathways);
+struct hash_map *shapes_to_map(struct shape **shapes, size_t *n_shapes);
 struct hash_map *attributions_to_map(struct attribution **attributions,
                                      size_t *n_attribution);
 struct hash_map *routes_to_map(struct route **routes, size_t *n_routes);

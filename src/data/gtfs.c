@@ -198,6 +198,82 @@ struct hash_map *trips_to_map(struct trip **trips, size_t *n_trips,
         return map;
 }
 
+struct shape **get_shapes_from_csv(csv_file *csv, size_t *n_shapes)
+{
+        if (csv == NULL || csv->headers == NULL || csv->rows == NULL) {
+                return NULL;
+        }
+
+        int i_shape_id = csv_col_index(csv, "shape_id");
+        int i_shape_pt_lat = csv_col_index(csv, "shape_pt_lat");
+        int i_shape_pt_lon = csv_col_index(csv, "shape_pt_lon");
+        int i_shape_pt_sequence = csv_col_index(csv, "shape_pt_sequence");
+
+        struct hash_map *shape_map = init_hashmap(50);
+
+        struct shape **shapes = malloc(csv->row_count * sizeof(struct shape *));
+        size_t shape_count = 0;
+        for (size_t r = 0; r < csv->row_count; r++) {
+                char **row = csv->rows[r];
+
+                char *shape_id = strdup(row[i_shape_id]);
+                struct shape *s = hash_map_get(shape_map, shape_id);
+                if (s == NULL) {
+                        s = calloc(1, sizeof(struct shape));
+                        s->shape_id = shape_id;
+                        s->points_n = 0;
+                        hash_map_insert(shape_map, shape_id, s);
+                        shapes[shape_count] = s;
+                        shape_count++;
+                }
+
+                struct shape_seq **points_t =
+                        realloc(s->points,
+                                (s->points_n + 1) * sizeof(struct shape_seq *));
+                struct shape_seq *seq = calloc(1, sizeof(struct shape_seq));
+                seq->shape_pt_lat = atof(row[i_shape_pt_lat]);
+                seq->shape_pt_lon = atof(row[i_shape_pt_lon]);
+                seq->shape_pt_sequence = atoi(row[i_shape_pt_sequence]);
+                s->points = points_t;
+                s->points[s->points_n++] = seq;
+        }
+        free_hashmap(shape_map);
+        *n_shapes = shape_count;
+        return shapes;
+}
+
+void associate_shape_route(struct trip **trips, size_t n_trips,
+                           struct hash_map *shape_map)
+{
+        if (trips == NULL || shape_map == NULL)
+                return;
+        for (size_t i = 0; i < n_trips; i++) {
+                struct trip *t = trips[i];
+                if (t->shape_id == NULL)
+                        continue;
+                struct shape *s = hash_map_get(shape_map, trips[i]->shape_id);
+                if (s == NULL)
+                        return;
+                s->route = t->route;
+        }
+}
+
+struct hash_map *shapes_to_map(struct shape **shapes, size_t *n_shapes)
+{
+        if (shapes == NULL) {
+                return NULL;
+        }
+        struct hash_map *map = init_hashmap(*n_shapes);
+        for (size_t i = 0; i < *n_shapes; i++) {
+                struct shape *s = shapes[i];
+                if (s == NULL) {
+                        continue;
+                }
+                hash_map_insert(map, s->shape_id, s);
+        }
+        return map;
+}
+
 struct attribution **get_attributions_from_csv(csv_file *csv,
                                                size_t *n_attributions,
                                                struct hash_map *routes)
@@ -491,15 +567,15 @@ void populate_stop_routes(struct stop_time **stop_times, size_t stop_times_n,
 
 int cmp_freq(void *thunk, const void *a, const void *b)
 {
-    struct hash_map *freq = thunk;
+        struct hash_map *freq = thunk;
 
-    const struct stop *sa = *(struct stop *const *)a;
-    const struct stop *sb = *(struct stop *const *)b;
+        const struct stop *sa = *(struct stop *const *)a;
+        const struct stop *sb = *(struct stop *const *)b;
 
-    intptr_t ca = (intptr_t)hash_map_get(freq, sa->stop_id);
-    intptr_t cb = (intptr_t)hash_map_get(freq, sb->stop_id);
+        intptr_t ca = (intptr_t)hash_map_get(freq, sa->stop_id);
+        intptr_t cb = (intptr_t)hash_map_get(freq, sb->stop_id);
 
-    return (cb > ca) - (cb < ca); 
+        return (cb > ca) - (cb < ca);
 }
 
 void populate_route_ends(struct trip **trips, size_t n_trips,
@@ -515,7 +591,7 @@ void populate_route_ends(struct trip **trips, size_t n_trips,
                 struct route *r = t->route;
                 struct stop *end = NULL;
                 if (t->stop_time_count > 0)
-                    end = t->stop_times[t->stop_time_count - 1]->stop;
+                        end = t->stop_times[t->stop_time_count - 1]->stop;
                 if (end == NULL)
                         continue;
                 if (r->end_stop_freq == NULL)
@@ -538,35 +614,38 @@ void populate_route_ends(struct trip **trips, size_t n_trips,
                 for (size_t b = 0; b < r->end_stop_freq->capacity; b++) {
                         for (struct hash_node *n = r->end_stop_freq->nodes[b];
                              n; n = n->next) {
-                                 intptr_t val = (intptr_t)n->value;
-                                 total_trips+=val;
-                                 initial_n_ends++;
+                                intptr_t val = (intptr_t)n->value;
+                                total_trips += val;
+                                initial_n_ends++;
                         }
                 }
-                struct stop** end_stops = calloc(initial_n_ends, sizeof(struct stop*));
+                struct stop **end_stops =
+                        calloc(initial_n_ends, sizeof(struct stop *));
                 if (end_stops == NULL)
-                    continue;
-                
+                        continue;
+
                 for (size_t b = 0; b < r->end_stop_freq->capacity; b++) {
                         for (struct hash_node *n = r->end_stop_freq->nodes[b];
                              n; n = n->next) {
-                                 intptr_t val = (intptr_t)n->value;
-                                 double thr = (0.005 * total_trips) < 20 ? 20 : (0.005 * total_trips);
-                                 if (val >= thr)
-                                 {
-                                     struct stop* s = hash_map_get(stop_map, n->key);
-                                     if (s == NULL)
-                                         continue;
-                                     end_stops[inserted_ends++] = s;
-                                 }
+                                intptr_t val = (intptr_t)n->value;
+                                double thr = (0.005 * total_trips) < 20 ?
+                                                     20 :
+                                                     (0.005 * total_trips);
+                                if (val >= thr) {
+                                        struct stop *s =
+                                                hash_map_get(stop_map, n->key);
+                                        if (s == NULL)
+                                                continue;
+                                        end_stops[inserted_ends++] = s;
+                                }
                         }
                 }
-                r->end_stops = realloc(end_stops, inserted_ends * sizeof(struct stop*));
+                r->end_stops = realloc(end_stops,
+                                       inserted_ends * sizeof(struct stop *));
                 r->n_end_stops = inserted_ends;
 
-                qsort_r(r->end_stops, r->n_end_stops, sizeof(struct stop*),
+                qsort_r(r->end_stops, r->n_end_stops, sizeof(struct stop *),
                         r->end_stop_freq, cmp_freq);
-
         }
 }
 
