@@ -42,6 +42,7 @@ void free_worker_data(worker_data *data)
                 free_stop_times(data->stop_times, data->n_stop_times);
 
         free_hashmap(data->agency_map);
+        free_hashmap(data->shape_map);
         free_hashmap(data->stop_map);
         free_hashmap(data->route_map);
         free_hashmap(data->trip_map);
@@ -124,14 +125,30 @@ void init_worker(int ui_pipe_fd, worker_data *data)
         data->stop_times = get_stop_times_from_csv(
                 csv_st, &n_stop_times, data->trip_map, data->stop_map);
         data->n_stop_times = n_stop_times;
-        send_log_ui_message(ui_pipe_fd, "Parsed %zu stop_times\n", n_stop_times);
+        send_log_ui_message(ui_pipe_fd, "Parsed %zu stop_times\n",
+                            n_stop_times);
 
         populate_stop_routes(data->stop_times, data->n_stop_times, data->stops,
                              data->n_stops);
-        
 
-        populate_route_ends(data->trips, data->n_trips, data->stop_map, data->routes, data->n_routes);
+        populate_route_ends(data->trips, data->n_trips, data->stop_map,
+                            data->routes, data->n_routes);
         send_log_ui_message(ui_pipe_fd, "Populated route data\n");
+
+        /* --- shapes --- */
+        send_log_ui_message(ui_pipe_fd, "Reading %s...\n",
+                            "data/gtfs/shapes.txt");
+        csv_file *csv_sh = read_csv_file("data/gtfs/shapes.txt", ',');
+        size_t n_shapes = 0;
+        data->shapes = get_shapes_from_csv(csv_sh, &n_shapes);
+        data->n_shapes = n_shapes;
+        free_csv(csv_sh);
+        send_log_ui_message(ui_pipe_fd, "Parsed %zu shapes\n", n_shapes);
+
+        struct hash_map *shape_map = shapes_to_map(data->shapes, &n_shapes);
+        data->shape_map = shape_map;
+        associate_shape_route(data->trips, n_trips, data->shape_map);
+        send_log_ui_message(ui_pipe_fd, "Populated shape routes\n");
 
         /* --- raptor build + itinerary --- */
         size_t n_routes_built = 0;

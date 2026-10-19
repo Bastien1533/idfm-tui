@@ -1,6 +1,8 @@
 #ifndef TUI_WORKER_H
 #define TUI_WORKER_H
 
+#include <stddef.h>
+
 typedef struct worker_data {
         // Agencies
         size_t n_agencies;
@@ -16,6 +18,11 @@ typedef struct worker_data {
         size_t n_trips;
         struct trip **trips;
         struct hash_map *trip_map;
+
+        // Shapes
+        size_t n_shapes;
+        struct shape **shapes;
+        struct hash_map *shape_map;
 
         // Stops
         size_t n_stops;
@@ -50,5 +57,6 @@ typedef struct worker_agrs {
 } worker_agrs;
 
 void *logic_worker(void *arg);
+void init_worker(int ui_pipe_fd, worker_data *data);
 
 #endif
