@@ -59,5 +59,9 @@ struct flat_shape *gtfs_pathways_to_flat(struct pathway **pathways,
                                          size_t *n_shapes);
 struct flat_shape *stops_to_circles(struct stop **stops, size_t n_stops,
                                     size_t *n_shapes, double lat_ref);
+struct flat_shape *init_flat_shapes(struct shape **shapes, size_t n_shapes,
+                                    size_t *n_flat_shapes, struct stop **stops,
+                                    size_t n_stops, double lat_ref);
+void free_flat_shapes(struct flat_shape *shapes, size_t n_shapes);
 
 #endif

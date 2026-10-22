@@ -65,6 +65,17 @@ void send_itinerary_res_ui(int pipe_fd, int request_seq, itinerary_res *res)
         }
 }
 
+void send_shape_res_ui(int pipe_fd, int request_seq, shape_res *res)
+{
+        ui_message *message = malloc(sizeof(ui_message));
+        if (message) {
+                message->type = UI_SHAPE_RESULT_DATA;
+                message->as.shapes = res;
+                message->seq = request_seq;
+                write(pipe_fd, &message, sizeof(ui_message *));
+        }
+}
+
 void free_log_ui_message(ui_message *message)
 {
         if (message != NULL) {
@@ -79,6 +90,16 @@ void send_stop_req_logic(int pipe_fd, int request_seq, char *stop_name)
         if (message) {
                 message->type = LOGIC_TASK_STOP_REQ;
                 message->stop_req.stop_name = stop_name;
+                message->seq = request_seq;
+                write(pipe_fd, &message, sizeof(logic_task_req *));
+        }
+}
+
+void send_shape_req_logic(int pipe_fd, int request_seq)
+{
+        logic_task_req *message = malloc(sizeof(logic_task_req));
+        if (message) {
+                message->type = LOGIC_TASK_SHAPES_REQ;
                 message->seq = request_seq;
                 write(pipe_fd, &message, sizeof(logic_task_req *));
         }

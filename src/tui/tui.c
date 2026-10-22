@@ -156,6 +156,16 @@ int render(void)
                                         free(incoming_msg);
                                 }
                                 break;
+                        case UI_SHAPE_RESULT_DATA:
+                                if (ctx->curr_scene != NULL &&
+                                    ctx->curr_scene->handle_message != NULL) {
+                                        ctx->curr_scene->handle_message(
+                                                ctx->curr_scene, incoming_msg);
+                                } else {
+                                        free(incoming_msg->as.shapes);
+                                        free(incoming_msg);
+                                }
+                                break;
                         case UI_ITINERARY_RESULT_DATA:
                                 if (ctx->curr_scene != NULL &&
                                     ctx->curr_scene->handle_message != NULL) {

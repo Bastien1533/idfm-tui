@@ -2,6 +2,7 @@
 #define PROTOCOL_H
 
 #include "algo/raptor.h"
+#include "map/shapes.h"
 #include <stddef.h>
 #include <notcurses/notcurses.h>
 
@@ -12,6 +13,7 @@ typedef enum {
         UI_ERASE,
         UI_STOP_RESULT_DATA,
         UI_ITINERARY_RESULT_DATA,
+        UI_SHAPE_RESULT_DATA,
 } ui_message_type;
 
 typedef struct {
@@ -22,6 +24,11 @@ typedef struct search_res {
         size_t n_res;
         struct ncselector_item **items;
 } search_res;
+
+typedef struct shape_res {
+        size_t n_shapes;
+        struct flat_shape *shapes;
+} shape_res;
 
 typedef struct itinerary_res {
         size_t n_itineraries;
@@ -37,6 +44,7 @@ typedef struct ui_message {
                 struct itinerary_res *itinerary_req_res;
                 ui_message_log log;
                 struct raptor_itinerary *itinerary;
+                struct shape_res *shapes;
         } as;
 } ui_message;
 
@@ -44,6 +52,7 @@ typedef enum {
         LOGIC_TASK_INIT_REQ,
         LOGIC_TASK_STOP_REQ,
         LOGIC_TASK_ITINERARY_REQ,
+        LOGIC_TASK_SHAPES_REQ,
         LOGIC_SHUTDOWN,
 } logic_task_type;
 
@@ -57,6 +66,13 @@ typedef struct logic_task_stop_req {
         char *route_name;
         char *stop_name;
 } logic_task_stop_req;
+
+typedef struct logic_task_shape_req {
+        char **include_trips_id;
+        size_t n_include_trips;
+        char **exclude_trips_id;
+        size_t n_exclude_trips;
+} logic_task_shape_req;
 
 typedef struct {
         logic_task_type type;

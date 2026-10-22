@@ -2,15 +2,40 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <notcurses/notcurses.h>
+#include <string.h>
+
 #include "tui/ui/button.h"
 #include "tui/scenes/scenes.h"
 #include "tui/scenes/itinerary.h"
-#include <string.h>
 #include "tui/scenes/menu.h"
+#include "tui/scenes/map.h"
 
 typedef struct {
         scene_t *self;
 } menu_button_switch_scene_payload;
+
+void menu_button_map(void *data)
+{
+        if (data == NULL)
+                return;
+
+        scene_t *scene = data;
+        if (scene == NULL || scene->parent_ctx == NULL)
+                return;
+        scene_t *map_scene = NULL;
+        for (size_t i = 0; i < scene->parent_ctx->n_scenes; i++) {
+                scene_t *s = scene->parent_ctx->scenes[i];
+                if (s && s->id && strcmp(s->id, "map_scene") == 0)
+                        map_scene = s;
+        }
+
+        if (map_scene == NULL) {
+                map_scene = create_map_scene(scene->nc, scene->parent,
+                                             scene->parent_ctx);
+                add_scene(map_scene, scene->parent_ctx);
+        }
+        switch_scene(scene->parent_ctx, map_scene);
+}
 
 void menu_button_itinerary(void *data)
 {
@@ -81,18 +106,31 @@ void scene_menu_on_enter(scene_t *scene)
                                        title_art[i]);
         }
 
-        ui_button_opts btn_opts = {
+        ui_button_opts map_btn_opts = {
                 .h = 3,
                 .w = 20,
                 .x = cols / 2 - 10,
                 .y = 10,
+                .id = "map_button",
+                .onclick = menu_button_map,
+                .onclick_payload = scene,
+        };
+
+        ui_button_opts iti_btn_opts = {
+                .h = 3,
+                .w = 20,
+                .x = cols / 2 - 10,
+                .y = 15,
                 .id = "itinerary_button",
                 .onclick = menu_button_itinerary,
                 .onclick_payload = scene,
         };
 
         add_button(scene->plane, &scene->ctx->buttons, &scene->ctx->n_buttons,
-                   scene->ctx->button_map, &btn_opts, "Itinerary Search");
+                   scene->ctx->button_map, &iti_btn_opts, "Itinerary Search");
+
+        add_button(scene->plane, &scene->ctx->buttons, &scene->ctx->n_buttons,
+                   scene->ctx->button_map, &map_btn_opts, "Show Map");
         return;
 }
 

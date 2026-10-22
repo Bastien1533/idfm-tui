@@ -1,3 +1,4 @@
+#include "map/map.h"
 #include "utils/csv.h"
 #include "data/dataset.h"
 #include "data/gtfs.h"

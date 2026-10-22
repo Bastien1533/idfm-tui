@@ -19,6 +19,7 @@ typedef enum {
         UI_MENU_SCENE,
         UI_ITINERARY_SCENE,
         UI_LOADING_SCENE,
+        UI_MAP_SCENE,
 } ui_scene_type;
 
 typedef struct {

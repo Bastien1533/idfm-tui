@@ -247,3 +247,60 @@ struct flat_shape *stops_to_circles(struct stop **stops, size_t n_stops,
         out_shapes = out_shapes_t;
         return out_shapes;
 }
+
+struct flat_shape *init_flat_shapes(struct shape **shapes, size_t n_shapes,
+                                    size_t *n_flat_shapes, struct stop **stops,
+                                    size_t n_stops, double lat_ref)
+{
+        struct flat_shape *flat_shapes =
+                calloc(n_shapes, sizeof(struct flat_shape));
+        *n_flat_shapes = n_shapes;
+
+        for (size_t k = 0; k < n_shapes; k++) {
+                struct shape *s = shapes[k];
+                if (s == NULL || s->route == NULL ||
+                    (s->route->route_type != 1 && s->route->route_type != 0 &&
+                     s->route->route_type != 2))
+                        continue;
+                struct flat_pt *out = NULL;
+                size_t n_out = 0; /* gtfs_shape_to_flat increments it */
+                struct flat_shape fshape =
+                        gtfs_shape_to_flat(s, lat_ref, &out, &n_out);
+                flat_shapes[k] = fshape;
+                if (out == NULL || n_out < 2) {
+                        free(out);
+                        continue;
+                }
+        }
+
+        size_t n_stops_shape = 0;
+        struct flat_shape *stops_shapes =
+                stops_to_circles(stops, n_stops, &n_stops_shape, lat_ref);
+        if (stops_shapes != NULL && n_stops_shape > 0) {
+                struct flat_shape *tmp =
+                        realloc(flat_shapes, (n_shapes + n_stops_shape) *
+                                                     sizeof(struct flat_shape));
+                if (tmp == NULL) {
+                        free(stops_shapes);
+                } else {
+                        flat_shapes = tmp;
+                        memcpy(flat_shapes + n_shapes, stops_shapes,
+                               n_stops_shape * sizeof(struct flat_shape));
+                        *n_flat_shapes += n_stops_shape;
+                }
+        }
+        return flat_shapes;
+}
+
+void free_flat_shapes(struct flat_shape *shapes, size_t n_shapes)
+{
+        if (shapes == NULL)
+                return;
+        for (size_t i = 0; i < n_shapes; i++) {
+                if (shapes[i].type == LINE)
+                        free(shapes[i].as.line.pts);
+                else if (shapes[i].type == TEXT)
+                        free(shapes[i].as.text.text);
+        }
+        free(shapes);
+}
