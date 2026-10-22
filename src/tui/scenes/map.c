@@ -119,7 +119,8 @@ void on_scene_map_exit(scene_t *scene)
 {
         map_ctx *m_ctx = scene->payload;
         if (m_ctx != NULL && m_ctx->map != NULL) {
-                free_flat_shapes(m_ctx->map->opts->shapes, m_ctx->map->opts->n_shapes);
+                free_flat_shapes(m_ctx->map->opts->shapes,
+                                 m_ctx->map->opts->n_shapes);
                 m_ctx->map->opts->shapes = NULL;
                 m_ctx->map->opts->n_shapes = 0;
                 free_map(m_ctx->map); /* frees plane + opts + cells + struct */
