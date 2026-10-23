@@ -234,8 +234,8 @@ void *logic_worker(void *arg)
                         } else if (incoming_req->type ==
                                    LOGIC_TASK_SHAPES_REQ) {
                                 struct shape_res *res = get_flat_shapes(
-                                        wdata->shapes, wdata->n_shapes,
-                                        wdata->stops, wdata->n_stops);
+                                    wdata->trips, wdata->n_trips, wdata->n_shapes, wdata->shape_map,
+                                    wdata->n_stops);
                                 send_shape_res_ui(wargs->pipe_ui_fd,
                                                   incoming_req->seq, res);
                         }

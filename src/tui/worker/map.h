@@ -5,7 +5,8 @@
 #include "data/gtfs.h"
 #include <notcurses/notcurses.h>
 
-struct shape_res *get_flat_shapes(struct shape **shapes, size_t n_shapes,
-                                  struct stop **stops, size_t n_stops);
+struct shape_res *get_flat_shapes(struct trip **trips, size_t n_trips,
+                                  size_t n_shapes, struct hash_map *shape_map,
+                                  size_t n_stops);
 
 #endif

@@ -3,6 +3,7 @@
 
 #include "utils/csv.h"
 #include "utils/hashmap.h"
+#include "data/rules.h"
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdlib.h>
@@ -26,6 +27,7 @@ struct route {
         char *route_long_name;
         char *route_desc;
         unsigned short route_type;
+        enum route_mode mode;
         char *route_url;
         char *route_color;
         char *route_text_color;
@@ -44,7 +46,7 @@ struct stop {
         double stop_lat;
         unsigned short int zone_id;
         char *stop_url;
-        unsigned short int location_type;
+        enum location_type location_type;
 
         char *parent_station_id;
         struct stop *parent_station;

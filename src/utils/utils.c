@@ -1,10 +1,11 @@
 #include "data/dataset.h"
+#include "data/rules.h"
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-enum Mode string_to_mode(const char *string)
+enum route_mode string_to_mode(const char *string)
 {
         if (string == NULL)
                 return UNKNOWN;
@@ -18,13 +19,13 @@ enum Mode string_to_mode(const char *string)
         if (strcmp(string, "CableWay") == 0)
                 return CABLE;
         if (strcmp(string, "LocalTrain") == 0)
-                return TRANSILIEN;
+                return COMMUTER_RAIL;
         if (strcmp(string, "RapidTransit") == 0)
-                return RER;
+                return COMMUTER_RAIL;
         if (strcmp(string, "regionalRail") == 0)
-                return TER;
+                return REGIONAL_RAIL;
         if (strcmp(string, "RailShuttle") == 0)
-                return ORLYVAL;
+                return AIRPORT_RAIL;
         if (strcmp(string, "Funicular") == 0)
                 return FUNICULAR;
 

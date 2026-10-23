@@ -7,6 +7,7 @@
 
 #include "data/gtfs.h"
 #include "map/map.h"
+#include "map/style.h"
 
 typedef struct shape gfts_shp;
 
@@ -53,15 +54,17 @@ struct flat_shape {
 };
 
 struct flat_shape gtfs_shape_to_flat(gfts_shp *shape, double lat_ref,
-                                     struct flat_pt **out, size_t *n_out);
+                                     struct flat_pt **out, size_t *n_out,
+                                     struct shape_style style);
 struct flat_shape *gtfs_pathways_to_flat(struct pathway **pathways,
                                          size_t n_pathways, double lat_ref,
                                          size_t *n_shapes);
-struct flat_shape *stops_to_circles(struct stop **stops, size_t n_stops,
-                                    size_t *n_shapes, double lat_ref);
-struct flat_shape *init_flat_shapes(struct shape **shapes, size_t n_shapes,
-                                    size_t *n_flat_shapes, struct stop **stops,
-                                    size_t n_stops, double lat_ref);
+struct flat_shape *flat_shapes_from_trips(struct trip **trips, size_t n_trips,
+                                          struct hash_map *shape_map,
+                                          size_t n_shapes,
+                                          size_t *n_flat_shapes, size_t n_stops,
+                                          double lat_ref);
+
 void free_flat_shapes(struct flat_shape *shapes, size_t n_shapes);
 
 #endif

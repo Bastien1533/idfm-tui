@@ -235,10 +235,11 @@ void map_render_loop(void)
 
         map_fit(&view, bbox);
 
-        struct flat_shape *flat_shapes =
-                init_flat_shapes(wdata->shapes, n_shapes, &n_shapes,
-                                 wdata->stops, wdata->n_stops, lat_ref);
-        map_fit_shapes(&view, flat_shapes, n_shapes);
+        size_t n_flat_shapes = 0;
+        struct flat_shape *flat_shapes = flat_shapes_from_trips(
+                wdata->trips, wdata->n_trips, wdata->shape_map, wdata->n_shapes,
+                &n_flat_shapes, wdata->n_stops, lat_ref);
+        map_fit_shapes(&view, flat_shapes, n_flat_shapes);
 
         struct ncplane *base_plane = notcurses_stdplane(nc);
         struct map_cell *cells;
@@ -247,7 +248,7 @@ void map_render_loop(void)
                 struct ncinput ni;
                 uint32_t key = notcurses_get_blocking(nc, &ni);
                 handle_map_input(&ni, key, &view);
-                draw_map(n_shapes, flat_shapes, view, &cells, base_plane);
+                draw_map(n_flat_shapes, flat_shapes, view, &cells, base_plane);
                 char *coords = NULL;
 
                 struct flat_pt view_geo = { .x = view.cx, .y = view.cy };

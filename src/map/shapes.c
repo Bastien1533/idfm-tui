@@ -1,4 +1,6 @@
 #include "data/gtfs.h"
+#include "map/style.h"
+#include "utils/hashmap.h"
 #include <stddef.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -10,7 +12,8 @@
 #include <string.h>
 
 struct flat_shape gtfs_shape_to_flat(gfts_shp *shape, double lat_ref,
-                                     struct flat_pt **out, size_t *n_out)
+                                     struct flat_pt **out, size_t *n_out,
+                                     struct shape_style style)
 {
         if (shape == NULL || shape->points_n == 0)
                 return (struct flat_shape){ 0 };
@@ -54,13 +57,9 @@ struct flat_shape gtfs_shape_to_flat(gfts_shp *shape, double lat_ref,
                     .pts = *out,
                     .n_pts = *n_out,
                 },
-                .min_scale = -1,
-                .max_scale = -1,
-                .color = (uint32_t)((shape->route &&
-                                     shape->route->route_color[0]) ?
-                                            strtoul(shape->route->route_color,
-                                                    NULL, 16) :
-                                            0xFFFFFF)
+                .min_scale = style.min_scale,
+                .max_scale = style.max_scale,
+                .color = style.color
         };
         return flat_shape;
 }
@@ -128,167 +127,150 @@ struct flat_shape *gtfs_pathways_to_flat(struct pathway **pathways,
         return out_shapes;
 }
 
-struct flat_shape *stops_to_circles(struct stop **stops, size_t n_stops,
-                                    size_t *n_shapes, double lat_ref)
+static struct flat_shape stop_to_label(struct stop *stop, double lat_ref,
+                                       struct shape_style style)
 {
-        if (stops == NULL || n_stops == 0)
-                return NULL;
+        struct flat_pt fp =
+                latlon_to_flat(stop->stop_lat, stop->stop_lon, lat_ref);
 
-        double xmax = INT_MIN;
-        double ymax = INT_MIN;
-        double xmin = INT_MAX;
-        double ymin = INT_MAX;
-
-        struct flat_shape *out_shapes =
-                calloc(n_stops * n_stops, sizeof(struct flat_shape));
-        if (out_shapes == NULL)
-                return NULL;
-
-        for (size_t i = 0; i < n_stops; i++) {
-                struct stop *stop = stops[i];
-                struct stop *parent_stop = stop->parent_station == NULL ?
-                                                   stop :
-                                                   stop->parent_station;
-                if (stop == NULL || stop->location_type == 0)
-                        continue;
-                bool has_tram = 0;
-                bool has_subway = 0;
-                bool has_rer = 0;
-                for (size_t j = 0; j < parent_stop->n_assoc_routes; j++) {
-                        if (parent_stop->assoc_routes[j]->route_type == 0)
-                                has_tram = 1;
-                        if (parent_stop->assoc_routes[j]->route_type == 1)
-                                has_subway = 1;
-                        if (parent_stop->assoc_routes[j]->route_type == 2)
-                                has_rer = 1;
-                }
-                if (has_rer == 0 && has_subway == 0 && has_tram == 0)
-                        continue;
-
-                struct flat_pt fp =
-                        latlon_to_flat(stop->stop_lat, stop->stop_lon, lat_ref);
-
-                xmax = fmax(xmax, fp.x);
-                ymax = fmax(ymax, fp.y);
-                xmin = fmin(xmin, fp.x);
-                ymin = fmin(ymin, fp.y);
-
-                uint32_t color = stop->location_type == 1 ?
-                                         0xFFFFF :
-                                         (stop->location_type == 0 ? 0xFFFFFF :
-                                                                     0x7A7A7A);
-
-                struct flat_shape shape = {
-                    .type = CIRCLE,
-                    .bbox = {
-                        .xmax = xmax,
-                        .xmin = xmin,
-                        .ymax = ymax,
-                        .ymin = ymin,
-                    },
-                    .color = color,
-                    .as.circle = {
-                        .radius = stop->location_type == 1 ? 2 : (stop->location_type == 0 ? 1 : 1),
-                        .mx = fp.x,
-                        .my = fp.y,
-                    },
-                    .min_scale = stop->location_type == 1 ? 20 : (stop->location_type == 0 ? 300 : 300),
-                    .max_scale = -1,
-                };
-
-                out_shapes[*n_shapes] = shape;
-                (*n_shapes)++;
-
-                if (stop->location_type == 1) {
-                        struct flat_shape shape = {
-                        .type = TEXT,
-                        .bbox = {
-                            .xmax = xmax,
-                            .xmin = xmin,
-                            .ymax = ymax,
-                            .ymin = ymin,
-                        },
-                        .color = 0xFFFFF,
-                        .as.text.text = strdup(stop->stop_name),
-                        .as.text.mx = fp.x,
-                        .as.text.my = fp.y,
-                        .min_scale = 50,
-                        .max_scale = -1,
-                    };
-
-                        out_shapes[*n_shapes] = shape;
-                        (*n_shapes)++;
-                }
-                if (stop->location_type == 2) {
-                        struct flat_shape shape = {
-                        .type = TEXT,
-                        .bbox = {
-                            .xmax = xmax,
-                            .xmin = xmin,
-                            .ymax = ymax,
-                            .ymin = ymin,
-                        },
-                        .color = 0x7A7A7A,
-                        .as.text.text = strdup(stop->stop_name),
-                        .as.text.mx = fp.x,
-                        .as.text.my = fp.y,
-                        .min_scale = 300,
-                        .max_scale = -1,
-                    };
-
-                        out_shapes[*n_shapes] = shape;
-                        (*n_shapes)++;
-                }
-        }
-        struct flat_shape *out_shapes_t =
-                realloc(out_shapes, *n_shapes * sizeof(struct flat_shape));
-        if (out_shapes_t == NULL)
-                return NULL;
-        out_shapes = out_shapes_t;
-        return out_shapes;
+        double mx = fp.x;
+        double my = fp.y;
+        struct flat_shape shape = {
+                .type = TEXT,
+                .bbox = { mx, mx + strlen(stop->stop_name), my, my + 1 },
+                .color = style.color,
+                .as.text.text = strdup(stop->stop_name),
+                .as.text.mx = mx,
+                .as.text.my = my,
+                .min_scale = style.min_scale,
+                .max_scale = style.max_scale,
+        };
+        return shape;
 }
 
-struct flat_shape *init_flat_shapes(struct shape **shapes, size_t n_shapes,
-                                    size_t *n_flat_shapes, struct stop **stops,
-                                    size_t n_stops, double lat_ref)
+static struct flat_shape stop_to_circle(struct stop *stop, double lat_ref,
+                                        struct shape_style style)
 {
-        struct flat_shape *flat_shapes =
-                calloc(n_shapes, sizeof(struct flat_shape));
-        *n_flat_shapes = n_shapes;
+        struct flat_pt fp =
+                latlon_to_flat(stop->stop_lat, stop->stop_lon, lat_ref);
 
-        for (size_t k = 0; k < n_shapes; k++) {
-                struct shape *s = shapes[k];
-                if (s == NULL || s->route == NULL ||
-                    (s->route->route_type != 1 && s->route->route_type != 0 &&
-                     s->route->route_type != 2))
-                        continue;
-                struct flat_pt *out = NULL;
-                size_t n_out = 0; /* gtfs_shape_to_flat increments it */
-                struct flat_shape fshape =
-                        gtfs_shape_to_flat(s, lat_ref, &out, &n_out);
-                flat_shapes[k] = fshape;
-                if (out == NULL || n_out < 2) {
-                        free(out);
-                        continue;
-                }
-        }
+        double mx = fp.x;
+        double my = fp.y;
 
-        size_t n_stops_shape = 0;
-        struct flat_shape *stops_shapes =
-                stops_to_circles(stops, n_stops, &n_stops_shape, lat_ref);
-        if (stops_shapes != NULL && n_stops_shape > 0) {
-                struct flat_shape *tmp =
-                        realloc(flat_shapes, (n_shapes + n_stops_shape) *
-                                                     sizeof(struct flat_shape));
-                if (tmp == NULL) {
-                        free(stops_shapes);
-                } else {
-                        flat_shapes = tmp;
-                        memcpy(flat_shapes + n_shapes, stops_shapes,
-                               n_stops_shape * sizeof(struct flat_shape));
-                        *n_flat_shapes += n_stops_shape;
-                }
+        struct flat_shape shape = {
+        .type = CIRCLE,
+        .bbox = { .xmax = mx + style.radius, .ymax = my + style.radius, .xmin = mx - style.radius, .ymin = my - style.radius },
+        .color = style.color,
+        .as.circle = {
+            .radius = style.radius,
+            .mx = mx,
+            .my = my,
+        },
+        .min_scale = style.min_scale,
+        .max_scale = style.max_scale,
+    };
+        return shape;
+}
+
+static bool trip_to_line_shape(struct trip *trip, struct hash_map *shape_map,
+                               double lat_ref, struct flat_shape *dst)
+{
+        struct shape *shp = hash_map_get(shape_map, trip->shape_id);
+        if (!shp || !(trip->route))
+                return false;
+
+        struct shape_style style = style_route(trip->route);
+
+        struct flat_pt *out = NULL;
+        size_t n_out = 0; /* gtfs_shape_to_flat increments it */
+        struct flat_shape fshp =
+                gtfs_shape_to_flat(shp, lat_ref, &out, &n_out, style);
+        if (out == NULL || n_out < 2) {
+                free(out);
+                return false;
         }
+        *dst = fshp;
+        return true;
+}
+
+static size_t stop_to_flat_shape(struct stop* s, struct flat_shape *flat_shapes, size_t n_flat_shapes, double lat_ref)
+{
+    size_t cur_n_flat_shapes = n_flat_shapes;
+    struct shape_style style = style_stop(s);
+    struct flat_shape circle_shp =
+            stop_to_circle(s, lat_ref, style);
+    flat_shapes[cur_n_flat_shapes++] = circle_shp;
+    if (style.label) {
+            struct flat_shape label_shp =
+                    stop_to_label(s, lat_ref, style);
+            flat_shapes[cur_n_flat_shapes++] = label_shp;
+    }
+    return cur_n_flat_shapes;
+}
+
+static size_t trip_to_stops_shapes(struct trip *trip,
+                                   struct hash_map *seen_stops, double lat_ref,
+                                   struct flat_shape *flat_shapes,
+                                   size_t n_flat_shapes)
+{
+        size_t cur_n_flat_shapes = n_flat_shapes;
+        for (size_t i = 0; i < trip->stop_time_count; i++) {
+                struct stop_time *st = trip->stop_times[i];
+                if (!st)
+                        continue;
+                struct stop *ps = st->stop->parent_station ? st->stop->parent_station : st->stop;
+                if (!ps || hash_map_get(seen_stops, ps->stop_id))
+                        continue;
+                uintptr_t mark = 1;
+                hash_map_insert(seen_stops, ps->stop_id, (void *)mark);
+                cur_n_flat_shapes = stop_to_flat_shape(ps, flat_shapes, cur_n_flat_shapes, lat_ref);
+                
+                for (size_t j = 0; j < ps->n_children; j++) {
+                    struct stop *s = ps->child_stops[j];
+    
+                    cur_n_flat_shapes = stop_to_flat_shape(s, flat_shapes, cur_n_flat_shapes, lat_ref);
+                }
+                
+        }
+        return cur_n_flat_shapes;
+}
+
+struct flat_shape *flat_shapes_from_trips(struct trip **trips, size_t n_trips,
+                                          struct hash_map *shape_map,
+                                          size_t n_shapes,
+                                          size_t *n_flat_shapes, size_t n_stops,
+                                          double lat_ref)
+{
+        if (trips == NULL || n_trips == 0)
+                return NULL;
+
+        struct flat_shape *flat_shapes = calloc(
+                n_shapes + (n_stops * 2),
+                sizeof(struct flat_shape)); // Worst case: n shapes, n stops * (1 circle + 1 label)
+        *n_flat_shapes = 0;
+
+        struct hash_map *seen_shapes = init_hashmap(n_trips);
+        struct hash_map *seen_stops = init_hashmap(n_stops);
+        for (size_t i = 0; i < n_trips; i++) {
+                struct trip *t = trips[i];
+                if (t->shape_id == NULL)
+                        continue;
+
+                uintptr_t mark = 1;
+                if (!((uintptr_t)hash_map_get(seen_shapes, t->shape_id) == 1)) {
+                        hash_map_insert(seen_shapes, t->shape_id, (void *)mark);
+                        struct flat_shape line_shape;
+                        if (trip_to_line_shape(t, shape_map, lat_ref,
+                                               &line_shape))
+                                flat_shapes[(*n_flat_shapes)++] = line_shape;
+                }
+                *n_flat_shapes = trip_to_stops_shapes(
+                        t, seen_stops, lat_ref, flat_shapes, *n_flat_shapes);
+        }
+        flat_shapes = realloc(flat_shapes, *n_flat_shapes * sizeof(struct flat_shape));
+
+        free_hashmap(seen_shapes);
+        free_hashmap(seen_stops);
         return flat_shapes;
 }
 

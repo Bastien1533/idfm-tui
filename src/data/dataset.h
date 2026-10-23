@@ -3,27 +3,15 @@
 
 #include "utils/csv.h"
 #include "utils/hashmap.h"
+#include "data/rules.h"
 #include <stdlib.h>
-
-enum Mode {
-        BUS,
-        METRO,
-        TRAMWAY,
-        CABLE,
-        TRANSILIEN,
-        RER,
-        TER,
-        ORLYVAL,
-        FUNICULAR,
-        UNKNOWN
-};
 
 struct dataset_line {
         char *route_id;
         char *route_long_name;
         char *operator_name;
         char *short_name;
-        enum Mode mode;
+        enum route_mode mode;
 
         struct trip **trips;
         size_t trip_count;
