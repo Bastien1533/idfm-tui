@@ -101,8 +101,27 @@ void send_shape_req_logic(int pipe_fd, int request_seq)
         if (message) {
                 message->type = LOGIC_TASK_SHAPES_REQ;
                 message->seq = request_seq;
+                struct logic_task_shape_req shape_req = { 0 };
+                message->shape_req = shape_req;
                 write(pipe_fd, &message, sizeof(logic_task_req *));
         }
+}
+
+void send_itinerary_shape_req_logic(int pipe_fd, int request_seq, struct trip** trips, size_t n_trips, struct stop* dep, struct stop* arr)
+{
+    logic_task_req *message = malloc(sizeof(logic_task_req));
+    if (message) {
+            message->type = LOGIC_TASK_ITINERARY_SHAPES_REQ;
+            message->seq = request_seq;
+            struct logic_task_itinerary_shape_req shape_req = { 
+                .arr = arr,
+                .dep = dep,
+                .trips = trips,
+                .n_trips = n_trips
+            };
+            message->itinerary_shape_req = shape_req;
+            write(pipe_fd, &message, sizeof(logic_task_req *));
+    }
 }
 
 void send_itinerary_req_logic(int pipe_fd, int request_seq, char *dep_stop_id,

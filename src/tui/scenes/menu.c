@@ -6,7 +6,7 @@
 
 #include "tui/ui/button.h"
 #include "tui/scenes/scenes.h"
-#include "tui/scenes/itinerary.h"
+#include "tui/scenes/itinerary/itinerary.h"
 #include "tui/scenes/menu.h"
 #include "tui/scenes/map.h"
 

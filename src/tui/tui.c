@@ -14,7 +14,7 @@
 #include "tui/worker/worker.h"
 
 #include "tui/scenes/scenes.h"
-#include "tui/scenes/itinerary.h"
+#include "tui/scenes/itinerary/itinerary.h"
 #include "tui/scenes/menu.h"
 #include "tui/scenes/loading.h"
 

@@ -53,13 +53,13 @@ typedef enum {
         LOGIC_TASK_STOP_REQ,
         LOGIC_TASK_ITINERARY_REQ,
         LOGIC_TASK_SHAPES_REQ,
+        LOGIC_TASK_ITINERARY_SHAPES_REQ,
         LOGIC_SHUTDOWN,
 } logic_task_type;
 
 typedef struct logic_task_itinerary_req {
         char *dep_id;
         char *arr_id;
-
 } logic_task_itinerary_req;
 
 typedef struct logic_task_stop_req {
@@ -68,16 +68,25 @@ typedef struct logic_task_stop_req {
 } logic_task_stop_req;
 
 typedef struct logic_task_shape_req {
-        char **include_trips_id;
+        struct trip **include_trips;
         size_t n_include_trips;
-        char **exclude_trips_id;
+        struct trip** exclude_trips;
         size_t n_exclude_trips;
 } logic_task_shape_req;
+
+typedef struct logic_task_itinerary_shape_req {
+    struct trip** trips;
+    size_t n_trips;
+    struct stop* dep;
+    struct stop* arr;
+} logic_task_itinerary_shape_req;
 
 typedef struct {
         logic_task_type type;
         size_t seq;
         union {
+                logic_task_shape_req shape_req;
+                logic_task_itinerary_shape_req itinerary_shape_req;
                 logic_task_itinerary_req itinerary_req;
                 logic_task_stop_req stop_req;
         };

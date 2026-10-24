@@ -137,7 +137,7 @@ static struct flat_shape stop_to_label(struct stop *stop, double lat_ref,
         double my = fp.y;
         struct flat_shape shape = {
                 .type = TEXT,
-                .bbox = { mx, mx + strlen(stop->stop_name), my, my + 1 },
+                .bbox = { .xmax = mx, .xmin = mx, .ymax = my, .ymin = my },
                 .color = style.color,
                 .as.text.text = strdup(stop->stop_name),
                 .as.text.mx = mx,
@@ -159,7 +159,7 @@ static struct flat_shape stop_to_circle(struct stop *stop, double lat_ref,
 
         struct flat_shape shape = {
         .type = CIRCLE,
-        .bbox = { .xmax = mx + style.radius, .ymax = my + style.radius, .xmin = mx - style.radius, .ymin = my - style.radius },
+        .bbox = { .xmax = mx, .xmin = mx, .ymax = my, .ymin = my },
         .color = style.color,
         .as.circle = {
             .radius = style.radius,
@@ -193,19 +193,18 @@ static bool trip_to_line_shape(struct trip *trip, struct hash_map *shape_map,
         return true;
 }
 
-static size_t stop_to_flat_shape(struct stop* s, struct flat_shape *flat_shapes, size_t n_flat_shapes, double lat_ref)
+static size_t stop_to_flat_shape(struct stop *s, struct flat_shape *flat_shapes,
+                                 size_t n_flat_shapes, double lat_ref)
 {
-    size_t cur_n_flat_shapes = n_flat_shapes;
-    struct shape_style style = style_stop(s);
-    struct flat_shape circle_shp =
-            stop_to_circle(s, lat_ref, style);
-    flat_shapes[cur_n_flat_shapes++] = circle_shp;
-    if (style.label) {
-            struct flat_shape label_shp =
-                    stop_to_label(s, lat_ref, style);
-            flat_shapes[cur_n_flat_shapes++] = label_shp;
-    }
-    return cur_n_flat_shapes;
+        size_t cur_n_flat_shapes = n_flat_shapes;
+        struct shape_style style = style_stop(s);
+        struct flat_shape circle_shp = stop_to_circle(s, lat_ref, style);
+        flat_shapes[cur_n_flat_shapes++] = circle_shp;
+        if (style.label) {
+                struct flat_shape label_shp = stop_to_label(s, lat_ref, style);
+                flat_shapes[cur_n_flat_shapes++] = label_shp;
+        }
+        return cur_n_flat_shapes;
 }
 
 static size_t trip_to_stops_shapes(struct trip *trip,
@@ -218,19 +217,22 @@ static size_t trip_to_stops_shapes(struct trip *trip,
                 struct stop_time *st = trip->stop_times[i];
                 if (!st)
                         continue;
-                struct stop *ps = st->stop->parent_station ? st->stop->parent_station : st->stop;
+                struct stop *ps = st->stop->parent_station ?
+                                          st->stop->parent_station :
+                                          st->stop;
                 if (!ps || hash_map_get(seen_stops, ps->stop_id))
                         continue;
                 uintptr_t mark = 1;
                 hash_map_insert(seen_stops, ps->stop_id, (void *)mark);
-                cur_n_flat_shapes = stop_to_flat_shape(ps, flat_shapes, cur_n_flat_shapes, lat_ref);
-                
+                cur_n_flat_shapes = stop_to_flat_shape(
+                        ps, flat_shapes, cur_n_flat_shapes, lat_ref);
+
                 for (size_t j = 0; j < ps->n_children; j++) {
-                    struct stop *s = ps->child_stops[j];
-    
-                    cur_n_flat_shapes = stop_to_flat_shape(s, flat_shapes, cur_n_flat_shapes, lat_ref);
+                        struct stop *s = ps->child_stops[j];
+
+                        cur_n_flat_shapes = stop_to_flat_shape(
+                                s, flat_shapes, cur_n_flat_shapes, lat_ref);
                 }
-                
         }
         return cur_n_flat_shapes;
 }
@@ -267,11 +269,54 @@ struct flat_shape *flat_shapes_from_trips(struct trip **trips, size_t n_trips,
                 *n_flat_shapes = trip_to_stops_shapes(
                         t, seen_stops, lat_ref, flat_shapes, *n_flat_shapes);
         }
-        flat_shapes = realloc(flat_shapes, *n_flat_shapes * sizeof(struct flat_shape));
+        flat_shapes = realloc(flat_shapes,
+                              *n_flat_shapes * sizeof(struct flat_shape));
 
         free_hashmap(seen_shapes);
         free_hashmap(seen_stops);
         return flat_shapes;
+}
+
+struct flat_shape *flat_shapes_from_itinerary(struct trip **trips, size_t n_trips,
+                                        struct stop* dep,
+                                        struct stop* arr,
+                                          struct hash_map *shape_map,
+                                          size_t n_shapes,
+                                          size_t *n_flat_shapes, size_t n_stops,
+                                          double lat_ref)
+{
+    if (trips == NULL || n_trips == 0)
+            return NULL;
+
+    struct flat_shape *flat_shapes = calloc(
+            n_shapes + (n_stops * 2),
+            sizeof(struct flat_shape)); // Worst case: n shapes, n stops * (1 circle + 1 label)
+    *n_flat_shapes = 0;
+
+    struct hash_map *seen_shapes = init_hashmap(n_trips);
+    struct hash_map *seen_stops = init_hashmap(n_stops);
+    for (size_t i = 0; i < n_trips; i++) {
+            struct trip *t = trips[i];
+            if (t->shape_id == NULL)
+                    continue;
+
+            uintptr_t mark = 1;
+            if (!((uintptr_t)hash_map_get(seen_shapes, t->shape_id) == 1)) {
+                    hash_map_insert(seen_shapes, t->shape_id, (void *)mark);
+                    struct flat_shape line_shape;
+                    if (trip_to_line_shape(t, shape_map, lat_ref,
+                                           &line_shape))
+                            flat_shapes[(*n_flat_shapes)++] = line_shape;
+            }
+            *n_flat_shapes = trip_to_stops_shapes(
+                    t, seen_stops, lat_ref, flat_shapes, *n_flat_shapes);
+    }
+    flat_shapes = realloc(flat_shapes,
+                          *n_flat_shapes * sizeof(struct flat_shape));
+
+    free_hashmap(seen_shapes);
+    free_hashmap(seen_stops);
+    return flat_shapes;
 }
 
 void free_flat_shapes(struct flat_shape *shapes, size_t n_shapes)

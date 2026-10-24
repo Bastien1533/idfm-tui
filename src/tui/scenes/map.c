@@ -55,14 +55,6 @@ static void receive_shape_res(scene_t *scene, ui_message *message)
         free(message);
 }
 
-static void receive_messages(scene_t *scene, ui_message *message)
-{
-        if (scene == NULL || message == NULL)
-                return;
-        if (message->type == UI_SHAPE_RESULT_DATA)
-                receive_shape_res(scene, message);
-}
-
 static void send_shape_req(void *payload)
 {
         if (payload == NULL)
@@ -73,6 +65,14 @@ static void send_shape_req(void *payload)
 
         send_shape_req_logic(scene->parent_ctx->ipc.pipe_logic_w,
                              scene->parent_ctx->ipc.request_seq);
+}
+
+static void receive_messages(scene_t *scene, ui_message *message)
+{
+        if (scene == NULL || message == NULL)
+                return;
+        if (message->type == UI_SHAPE_RESULT_DATA)
+                receive_shape_res(scene, message);
 }
 
 void scene_map_on_enter(scene_t *scene)

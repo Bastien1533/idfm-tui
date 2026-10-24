@@ -15,6 +15,7 @@ void send_stop_req_logic(int pipe_fd, int request_seq, char *stop_name);
 void send_itinerary_req_logic(int pipe_fd, int request_seq, char *dep_stop_id,
                               char *arr_stop_id);
 void send_shape_req_logic(int pipe_fd, int request_seq);
+void send_itinerary_shape_req_logic(int pipe_fd, int request_seq, struct trip** trips, size_t n_trips, struct stop* dep, struct stop* arr);
 
 void free_log_ui_message(ui_message *message);
 

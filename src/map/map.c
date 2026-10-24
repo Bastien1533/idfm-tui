@@ -84,23 +84,21 @@ void map_fit_shapes(struct map_view *view, struct flat_shape *shapes,
 
         struct flat_shape fs = shapes[0];
 
-        double xmax = fs.bbox.xmax;
-        double ymax = fs.bbox.ymax;
-        double xmin = fs.bbox.xmin;
-        double ymin = fs.bbox.ymin;
-
+        double xmax = -INFINITY, ymax = -INFINITY;
+        double xmin = INFINITY,  ymin = INFINITY;
+        size_t used = 0;
+        
         for (size_t i = 0; i < n_shapes; i++) {
                 if (!shape_valid(&shapes[i]))
                         continue;
-                xmax = fs.bbox.xmax > shapes[i].bbox.xmax ? fs.bbox.xmax :
-                                                            shapes[i].bbox.xmax;
-                ymax = fs.bbox.ymax > shapes[i].bbox.ymax ? fs.bbox.ymax :
-                                                            shapes[i].bbox.ymax;
-                xmin = fs.bbox.xmin > shapes[i].bbox.xmin ? fs.bbox.xmin :
-                                                            shapes[i].bbox.xmin;
-                ymin = fs.bbox.ymin > shapes[i].bbox.ymin ? fs.bbox.ymin :
-                                                            shapes[i].bbox.ymin;
+                xmax = fmax(xmax, shapes[i].bbox.xmax);
+                ymax = fmax(ymax, shapes[i].bbox.ymax);
+                xmin = fmin(xmin, shapes[i].bbox.xmin);
+                ymin = fmin(ymin, shapes[i].bbox.ymin);
+                used++;
         }
+        if (used == 0 || xmax < xmin || ymax < ymin)
+                return;
 
         struct bbox bbox = {
                 .xmax = xmax,

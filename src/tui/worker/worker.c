@@ -234,8 +234,20 @@ void *logic_worker(void *arg)
                         } else if (incoming_req->type ==
                                    LOGIC_TASK_SHAPES_REQ) {
                                 struct shape_res *res = get_flat_shapes(
-                                    wdata->trips, wdata->n_trips, wdata->n_shapes, wdata->shape_map,
-                                    wdata->n_stops);
+                                        wdata->trips, wdata->n_trips,
+                                        wdata->n_shapes, wdata->shape_map,
+                                        wdata->n_stops,
+                                        incoming_req->shape_req);
+                                send_shape_res_ui(wargs->pipe_ui_fd,
+                                                  incoming_req->seq, res);
+                        }
+                        else if (incoming_req->type ==
+                                   LOGIC_TASK_ITINERARY_SHAPES_REQ) {
+                                struct shape_res *res = get_itinerary_flat_shapes(
+                                        wdata->trips, wdata->n_trips,
+                                        wdata->n_shapes, wdata->shape_map,
+                                        wdata->n_stops,
+                                        incoming_req->itinerary_shape_req);
                                 send_shape_res_ui(wargs->pipe_ui_fd,
                                                   incoming_req->seq, res);
                         }
