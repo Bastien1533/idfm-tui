@@ -63,12 +63,13 @@ struct shape_res *get_flat_shapes(struct trip **trips, size_t n_trips,
         return res;
 }
 
-struct shape_res *get_itinerary_flat_shapes(struct raptor_itinerary* itinerary,
+struct shape_res *get_itinerary_flat_shapes(struct raptor_itinerary *itinerary,
                                             size_t n_shapes,
                                             struct hash_map *shape_map,
                                             size_t n_stops, double lat_ref)
 {
-        struct trip **filtered_trips = calloc(itinerary->n_trips, sizeof(struct trip *));
+        struct trip **filtered_trips =
+                calloc(itinerary->n_trips, sizeof(struct trip *));
 
         size_t trip_idx = 0;
         for (size_t i = 0; i < itinerary->n_legs; i++) {
@@ -79,9 +80,9 @@ struct shape_res *get_itinerary_flat_shapes(struct raptor_itinerary* itinerary,
         }
 
         size_t n_flat_shapes = 0;
-        struct flat_shape *flat_shapes = flat_shapes_from_itinerary(
-               itinerary, shape_map, n_shapes,
-                &n_flat_shapes, n_stops, lat_ref);
+        struct flat_shape *flat_shapes =
+                flat_shapes_from_itinerary(itinerary, shape_map, n_shapes,
+                                           &n_flat_shapes, n_stops, lat_ref);
 
         if (flat_shapes == NULL)
                 return NULL;
