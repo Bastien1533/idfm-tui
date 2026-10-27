@@ -43,7 +43,7 @@ void add_itinerary_item_selector(ui_selector *selector, char type, char *id,
 }
 
 void itinerary_format_raptor_selector(struct raptor_itinerary *itinerary,
-                                   ui_selector *sel)
+                                      ui_selector *sel)
 {
         if (itinerary == NULL) {
                 return;

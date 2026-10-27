@@ -35,7 +35,8 @@ void itinerary_send_stop_req(ui_input *, void *);
 void itinerary_send_shape_req(void *payload);
 void itinerary_send_itinerary_req(void *);
 void itinerary_show_assoc_selector(ui_input *, void *);
-void itinerary_show_itinerary_as_selector(ui_selector *prev_selector, void *arg);
+void itinerary_show_itinerary_as_selector(ui_selector *prev_selector,
+                                          void *arg);
 
 void itinerary_on_stop_select(ui_selector *, void *);
 void itinerary_format_raptor_selector(struct raptor_itinerary *, ui_selector *);

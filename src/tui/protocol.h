@@ -28,6 +28,7 @@ typedef struct search_res {
 typedef struct shape_res {
         size_t n_shapes;
         struct flat_shape *shapes;
+        double lat_ref;
 } shape_res;
 
 typedef struct itinerary_res {
@@ -70,15 +71,16 @@ typedef struct logic_task_stop_req {
 typedef struct logic_task_shape_req {
         struct trip **include_trips;
         size_t n_include_trips;
-        struct trip** exclude_trips;
+        struct trip **exclude_trips;
         size_t n_exclude_trips;
 } logic_task_shape_req;
 
 typedef struct logic_task_itinerary_shape_req {
-    struct trip** trips;
-    size_t n_trips;
-    struct stop* dep;
-    struct stop* arr;
+        struct trip **trips;
+        size_t n_trips;
+        struct stop *dep;
+        struct stop *arr;
+        struct raptor_itinerary *itinerary;
 } logic_task_itinerary_shape_req;
 
 typedef struct {

@@ -141,8 +141,10 @@ void init_worker(int ui_pipe_fd, worker_data *data)
                             "data/gtfs2/shapes.txt");
         csv_file *csv_sh = read_csv_file("data/gtfs2/shapes.txt", ',');
         size_t n_shapes = 0;
-        data->shapes = get_shapes_from_csv(csv_sh, &n_shapes);
+        double lat_ref;
+        data->shapes = get_shapes_from_csv(csv_sh, &n_shapes, &lat_ref);
         data->n_shapes = n_shapes;
+        data->lat_ref = lat_ref;
         free_csv(csv_sh);
         send_log_ui_message(ui_pipe_fd, "Parsed %zu shapes\n", n_shapes);
 
@@ -236,18 +238,20 @@ void *logic_worker(void *arg)
                                 struct shape_res *res = get_flat_shapes(
                                         wdata->trips, wdata->n_trips,
                                         wdata->n_shapes, wdata->shape_map,
-                                        wdata->n_stops,
+                                        wdata->n_stops, wdata->lat_ref,
                                         incoming_req->shape_req);
                                 send_shape_res_ui(wargs->pipe_ui_fd,
                                                   incoming_req->seq, res);
-                        }
-                        else if (incoming_req->type ==
+                        } else if (incoming_req->type ==
                                    LOGIC_TASK_ITINERARY_SHAPES_REQ) {
-                                struct shape_res *res = get_itinerary_flat_shapes(
-                                        wdata->trips, wdata->n_trips,
-                                        wdata->n_shapes, wdata->shape_map,
-                                        wdata->n_stops,
-                                        incoming_req->itinerary_shape_req);
+                                struct shape_res *res =
+                                        get_itinerary_flat_shapes(
+                                                incoming_req->itinerary_shape_req.itinerary,
+                                                wdata->n_shapes,
+                                                wdata->shape_map,
+                                                wdata->n_stops, wdata->lat_ref,
+                                                incoming_req
+                                                        ->itinerary_shape_req);
                                 send_shape_res_ui(wargs->pipe_ui_fd,
                                                   incoming_req->seq, res);
                         }

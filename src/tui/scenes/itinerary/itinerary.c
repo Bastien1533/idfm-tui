@@ -82,7 +82,8 @@ void scene_itinerary_on_enter(scene_t *scene)
                                               .cols = 200,
                                               .rows = 400,
                                               .id = "test",
-                                              .onselect = itinerary_on_stop_select,
+                                              .onselect =
+                                                      itinerary_on_stop_select,
                                               .is_scrollable = true };
                 sel_opts.onselect_payload =
                         (i == 0) ? (void *)&itinerary_ctx->dep_stop_id :

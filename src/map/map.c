@@ -85,9 +85,9 @@ void map_fit_shapes(struct map_view *view, struct flat_shape *shapes,
         struct flat_shape fs = shapes[0];
 
         double xmax = -INFINITY, ymax = -INFINITY;
-        double xmin = INFINITY,  ymin = INFINITY;
+        double xmin = INFINITY, ymin = INFINITY;
         size_t used = 0;
-        
+
         for (size_t i = 0; i < n_shapes; i++) {
                 if (!shape_valid(&shapes[i]))
                         continue;
@@ -218,14 +218,13 @@ void map_render_loop(void)
         notcurses_term_dim_yx(nc, &rows, &cols);
         notcurses_mice_enable(nc, NCMICE_ALL_EVENTS);
 
-        double lat_ref = 52.5173885;
-        struct map_view view = map_init(rows, cols, lat_ref);
+        struct map_view view = map_init(rows, cols, wdata->lat_ref);
         struct flat_pt a = geo_to_flat((struct geo_pt){ .lon = 13.3951309,
                                                         .lat = 51.5173885 },
-                                       lat_ref);
+                                       wdata->lat_ref);
         struct flat_pt b = geo_to_flat((struct geo_pt){ .lon = 12.3951309,
                                                         .lat = 52.5173885 },
-                                       lat_ref);
+                                       wdata->lat_ref);
         struct bbox bbox = { .xmin = fmin(a.x, b.x),
                              .xmax = fmax(a.x, b.x),
                              .ymin = fmin(a.y, b.y),
@@ -236,7 +235,7 @@ void map_render_loop(void)
         size_t n_flat_shapes = 0;
         struct flat_shape *flat_shapes = flat_shapes_from_trips(
                 wdata->trips, wdata->n_trips, wdata->shape_map, wdata->n_shapes,
-                &n_flat_shapes, wdata->n_stops, lat_ref);
+                &n_flat_shapes, wdata->n_stops, wdata->lat_ref);
         map_fit_shapes(&view, flat_shapes, n_flat_shapes);
 
         struct ncplane *base_plane = notcurses_stdplane(nc);

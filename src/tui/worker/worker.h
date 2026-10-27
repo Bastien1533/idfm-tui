@@ -23,6 +23,7 @@ typedef struct worker_data {
         size_t n_shapes;
         struct shape **shapes;
         struct hash_map *shape_map;
+        double lat_ref;
 
         // Stops
         size_t n_stops;

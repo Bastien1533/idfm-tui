@@ -43,7 +43,7 @@ static void receive_shape_res(scene_t *scene, ui_message *message)
                         .cols = cols - 10,
                         .x = 5,
                         .y = 2,
-                        .lat_ref = 52.5173885,
+                        .lat_ref = message->as.shapes->lat_ref,
                 };
                 struct ui_map *map =
                         create_map(scene->plane, &motps, scene->nc);

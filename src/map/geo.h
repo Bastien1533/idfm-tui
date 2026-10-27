@@ -29,5 +29,6 @@ struct bbox get_bbox(struct flat_pt pt1, struct flat_pt pt2);
 
 bool clip_shape(struct flat_shape *shape, struct flat_shape *out_shape,
                 struct map_view *view);
+struct bbox get_shape_bbox(struct flat_shape *shape);
 
 #endif

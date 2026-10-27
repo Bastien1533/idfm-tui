@@ -16,7 +16,6 @@
 #include "tui/scenes/scenes.h"
 #include "tui/scenes/itinerary/itinerary.h"
 
-
 void itinerary_show_assoc_selector(ui_input *ipt, void *payload)
 {
         ui_scene_ctx *scene_ctx = (ui_scene_ctx *)payload;
@@ -50,10 +49,9 @@ static void escape_focused_itinerary(ui_selector *src, void *arg)
                         }
                 }
         }
-        if (i_ctx->map != NULL)
-        {
-            free_map(i_ctx->map);
-            i_ctx->map = NULL;
+        if (i_ctx->map != NULL) {
+                free_map(i_ctx->map);
+                i_ctx->map = NULL;
         }
 }
 
@@ -170,12 +168,12 @@ void itinerary_show_itinerary_as_selector(ui_selector *prev_selector, void *arg)
         }
         if (i_ctx->itinerary_detail_selector == NULL)
                 return;
-        itinerary_format_raptor_selector(i_ctx->itinerary_req_result->itineraries[idx],
-                               i_ctx->itinerary_detail_selector);
+        itinerary_format_raptor_selector(
+                i_ctx->itinerary_req_result->itineraries[idx],
+                i_ctx->itinerary_detail_selector);
         i_ctx->focused_itinerary_idx = idx;
         itinerary_send_shape_req(scene);
 }
-
 
 void itinerary_on_stop_select(ui_selector *sel, void *arg)
 {

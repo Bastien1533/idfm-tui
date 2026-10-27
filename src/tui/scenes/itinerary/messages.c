@@ -19,7 +19,6 @@
 #include "tui/scenes/itinerary/itinerary.h"
 #include "tui/msg.h"
 
-
 static void receive_map(scene_t *scene, ui_message *message)
 {
         if (scene == NULL || scene->payload == NULL || message == NULL ||
@@ -38,29 +37,28 @@ static void receive_map(scene_t *scene, ui_message *message)
         itinerary_ctx *m_ctx = scene->payload;
 
         unsigned rows, cols;
-        ncplane_dim_yx(scene->plane, &rows, &cols); 
+        ncplane_dim_yx(scene->plane, &rows, &cols);
 
-        const unsigned pad  = 1;
-        const unsigned left = 30;                     //inputs/buttons width
+        const unsigned pad = 1;
+        const unsigned left = 30; //inputs/buttons width
         unsigned sel_w = 0;
-        
+
         if (m_ctx->itinerary_detail_selector &&
             m_ctx->itinerary_detail_selector->visible &&
             m_ctx->itinerary_detail_selector->box_plane)
-                sel_w = ncplane_dim_x(ncselector_plane(m_ctx->itinerary_detail_selector->selector));
+                sel_w = ncplane_dim_x(ncselector_plane(
+                        m_ctx->itinerary_detail_selector->selector));
 
-        unsigned map_x = left + pad + (sel_w ? sel_w + pad : 0);  /* 31, or 83 */
+        unsigned map_x = left + pad + (sel_w ? sel_w + pad : 0); /* 31, or 83 */
         unsigned map_y = 1;
         unsigned map_w = cols > map_x + pad ? cols - map_x - pad : 0;
         unsigned map_h = rows > map_y + pad ? rows - map_y - pad : 0;
 
-        if (m_ctx->map != NULL)
-        {
-            free_map(m_ctx->map);
-            m_ctx->map = NULL;
+        if (m_ctx->map != NULL) {
+                free_map(m_ctx->map);
+                m_ctx->map = NULL;
         }
-        
-        
+
         if (m_ctx->map == NULL) {
                 struct map_cell *cells =
                         calloc(rows * cols, sizeof(struct map_cell));
@@ -71,7 +69,7 @@ static void receive_map(scene_t *scene, ui_message *message)
                         .cols = map_w,
                         .x = map_x,
                         .y = map_y,
-                        .lat_ref = 52.5173885,
+                        .lat_ref = message->as.shapes->lat_ref,
                 };
                 struct ui_map *map =
                         create_map(scene->plane, &motps, scene->nc);
@@ -90,27 +88,27 @@ void itinerary_send_shape_req(void *payload)
         scene_t *scene = payload;
         itinerary_ctx *m_c = scene->payload;
         if (m_c->itinerary_req_result == NULL)
-            return;
+                return;
 
-        struct itinerary_res* iti_res = m_c->itinerary_req_result;
+        struct itinerary_res *iti_res = m_c->itinerary_req_result;
         if (iti_res->n_itineraries == 0 || iti_res->itineraries == NULL)
-            return;
-        struct raptor_itinerary* iti = iti_res->itineraries[m_c->focused_itinerary_idx];
-        struct trip** trips = calloc(iti->n_trips, sizeof(struct trip*));
-        
+                return;
+        struct raptor_itinerary *iti =
+                iti_res->itineraries[m_c->focused_itinerary_idx];
+
+        /*struct trip **trips = calloc(iti->n_trips, sizeof(struct trip *));
+
         size_t trip_idx = 0;
         for (size_t i = 0; i < iti->n_legs; i++) {
-            struct raptor_leg* leg = iti->legs[i];
-            if (leg->trip != NULL)
-            {
-                trips[trip_idx++] = leg->trip;
-            }
-        }
-        
+                struct raptor_leg *leg = iti->legs[i];
+                if (leg->trip != NULL) {
+                        trips[trip_idx++] = leg->trip;
+                }
+        } */
 
         scene->parent_ctx->ipc.request_seq++;
         send_itinerary_shape_req_logic(scene->parent_ctx->ipc.pipe_logic_w,
-                             scene->parent_ctx->ipc.request_seq, trips, iti->n_trips, NULL, NULL);
+                                       scene->parent_ctx->ipc.request_seq, iti);
 }
 
 static void receive_stop_res(scene_t *scene, ui_message *message)

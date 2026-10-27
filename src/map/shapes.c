@@ -1,5 +1,7 @@
+#include "algo/raptor.h"
 #include "data/gtfs.h"
 #include "map/style.h"
+#include "map/trip_cut.h"
 #include "utils/hashmap.h"
 #include <stddef.h>
 #include <stdint.h>
@@ -237,6 +239,52 @@ static size_t trip_to_stops_shapes(struct trip *trip,
         return cur_n_flat_shapes;
 }
 
+static size_t leg_to_stops_shapes(struct raptor_leg *leg,
+                                  struct hash_map *seen_stops, double lat_ref,
+                                  struct flat_shape *flat_shapes, size_t n)
+{
+        struct trip *t = leg->trip;
+
+        size_t i_from = 0, i_to = t->stop_time_count ? t->stop_time_count - 1 : 0;
+        bool found = false;
+        for (size_t i = 0; i < t->stop_time_count; i++) {
+                if (t->stop_times[i]->stop == leg->from->stop) {
+                        i_from = i; found = true; break;
+                }
+        }
+        for (size_t i = t->stop_time_count; i-- > 0; ) {
+                if (t->stop_times[i]->stop == leg->to->stop) { i_to = i; break; }
+        }
+        if (!found)
+                return n;                 
+
+        size_t cur_n_flat_shapes = n;
+        size_t lo = fmin(i_from, i_to);   
+        size_t hi = fmax(i_from, i_to);
+        for (size_t i = lo; i <= hi; i++) {
+            struct stop_time *st = leg->trip->stop_times[i];
+            if (!st)
+                    continue;
+            struct stop *ps = st->stop->parent_station ?
+                                      st->stop->parent_station :
+                                      st->stop;
+            if (!ps || hash_map_get(seen_stops, ps->stop_id))
+                    continue;
+            uintptr_t mark = 1;
+            hash_map_insert(seen_stops, ps->stop_id, (void *)mark);
+            cur_n_flat_shapes = stop_to_flat_shape(
+                    ps, flat_shapes, cur_n_flat_shapes, lat_ref);
+
+            for (size_t j = 0; j < ps->n_children; j++) {
+                    struct stop *s = ps->child_stops[j];
+
+                    cur_n_flat_shapes = stop_to_flat_shape(
+                            s, flat_shapes, cur_n_flat_shapes, lat_ref);
+            }
+        }
+        return n;
+}
+
 struct flat_shape *flat_shapes_from_trips(struct trip **trips, size_t n_trips,
                                           struct hash_map *shape_map,
                                           size_t n_shapes,
@@ -277,46 +325,44 @@ struct flat_shape *flat_shapes_from_trips(struct trip **trips, size_t n_trips,
         return flat_shapes;
 }
 
-struct flat_shape *flat_shapes_from_itinerary(struct trip **trips, size_t n_trips,
-                                        struct stop* dep,
-                                        struct stop* arr,
-                                          struct hash_map *shape_map,
-                                          size_t n_shapes,
-                                          size_t *n_flat_shapes, size_t n_stops,
-                                          double lat_ref)
+struct flat_shape *flat_shapes_from_itinerary(
+        struct raptor_itinerary* itinerary,
+        struct hash_map *shape_map, size_t n_shapes, size_t *n_flat_shapes,
+        size_t n_stops, double lat_ref)
 {
-    if (trips == NULL || n_trips == 0)
-            return NULL;
+        if (itinerary == NULL)
+                return NULL;
 
-    struct flat_shape *flat_shapes = calloc(
-            n_shapes + (n_stops * 2),
-            sizeof(struct flat_shape)); // Worst case: n shapes, n stops * (1 circle + 1 label)
-    *n_flat_shapes = 0;
+        struct flat_shape *flat_shapes = calloc(
+                n_shapes + (n_stops * 2),
+                sizeof(struct flat_shape)); // Worst case: n shapes, n stops * (1 circle + 1 label)
+        *n_flat_shapes = 0;
 
-    struct hash_map *seen_shapes = init_hashmap(n_trips);
-    struct hash_map *seen_stops = init_hashmap(n_stops);
-    for (size_t i = 0; i < n_trips; i++) {
-            struct trip *t = trips[i];
-            if (t->shape_id == NULL)
-                    continue;
+        struct hash_map *seen_shapes = init_hashmap(itinerary->n_trips);
+        struct hash_map *seen_stops = init_hashmap(n_stops);
+        for (size_t i = 0; i < itinerary->n_legs; i++) {
+            struct raptor_leg *leg = itinerary->legs[i];
+                    if (leg->trip == NULL || leg->trip->shape_id == NULL)
+                            continue;                         /* walking leg: no line */
+            
+                    struct flat_shape line;
+                    if (!trip_to_line_shape(leg->trip, shape_map, lat_ref, &line))
+                            continue;                         /* no shape: skip */
+            
+                    struct flat_shape cut;
+                    if (cut_trip_flatshape(line, leg->from->stop, leg->to->stop, lat_ref, &cut))
+                            line = cut;                       /* cut failed → keep FULL line */
+            
+                    flat_shapes[(*n_flat_shapes)++] = line;
+                *n_flat_shapes = leg_to_stops_shapes(
+                        leg, seen_stops, lat_ref, flat_shapes, *n_flat_shapes);
+        }
+        flat_shapes = realloc(flat_shapes,
+                              *n_flat_shapes * sizeof(struct flat_shape));
 
-            uintptr_t mark = 1;
-            if (!((uintptr_t)hash_map_get(seen_shapes, t->shape_id) == 1)) {
-                    hash_map_insert(seen_shapes, t->shape_id, (void *)mark);
-                    struct flat_shape line_shape;
-                    if (trip_to_line_shape(t, shape_map, lat_ref,
-                                           &line_shape))
-                            flat_shapes[(*n_flat_shapes)++] = line_shape;
-            }
-            *n_flat_shapes = trip_to_stops_shapes(
-                    t, seen_stops, lat_ref, flat_shapes, *n_flat_shapes);
-    }
-    flat_shapes = realloc(flat_shapes,
-                          *n_flat_shapes * sizeof(struct flat_shape));
-
-    free_hashmap(seen_shapes);
-    free_hashmap(seen_stops);
-    return flat_shapes;
+        free_hashmap(seen_shapes);
+        free_hashmap(seen_stops);
+        return flat_shapes;
 }
 
 void free_flat_shapes(struct flat_shape *shapes, size_t n_shapes)

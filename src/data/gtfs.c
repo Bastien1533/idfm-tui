@@ -2,9 +2,11 @@
 #include "utils/csv.h"
 #include "utils/hashmap.h"
 #include "utils/utils.h"
+#include <limits.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -198,11 +200,15 @@ struct hash_map *trips_to_map(struct trip **trips, size_t *n_trips,
         return map;
 }
 
-struct shape **get_shapes_from_csv(csv_file *csv, size_t *n_shapes)
+struct shape **get_shapes_from_csv(csv_file *csv, size_t *n_shapes,
+                                   double *lat_ref)
 {
         if (csv == NULL || csv->headers == NULL || csv->rows == NULL) {
                 return NULL;
         }
+
+        double min_lat = INT_MAX;
+        double max_lat = INT_MIN;
 
         int i_shape_id = csv_col_index(csv, "shape_id");
         int i_shape_pt_lat = csv_col_index(csv, "shape_pt_lat");
@@ -234,9 +240,17 @@ struct shape **get_shapes_from_csv(csv_file *csv, size_t *n_shapes)
                 seq->shape_pt_lat = atof(row[i_shape_pt_lat]);
                 seq->shape_pt_lon = atof(row[i_shape_pt_lon]);
                 seq->shape_pt_sequence = atoi(row[i_shape_pt_sequence]);
+
+                min_lat = fmin(min_lat, seq->shape_pt_lat);
+                max_lat = fmax(max_lat, seq->shape_pt_lat);
+
                 s->points = points_t;
                 s->points[s->points_n++] = seq;
         }
+        if (min_lat == INT_MAX || max_lat == INT_MIN)
+                *lat_ref = 48.85;
+        else
+                *lat_ref = (max_lat + min_lat) / 2;
         free_hashmap(shape_map);
         *n_shapes = shape_count;
         return shapes;

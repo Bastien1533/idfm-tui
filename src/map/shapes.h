@@ -6,6 +6,7 @@
 #include <stdbool.h>
 
 #include "data/gtfs.h"
+#include "algo/raptor.h"
 #include "map/map.h"
 #include "map/style.h"
 
@@ -64,13 +65,10 @@ struct flat_shape *flat_shapes_from_trips(struct trip **trips, size_t n_trips,
                                           size_t n_shapes,
                                           size_t *n_flat_shapes, size_t n_stops,
                                           double lat_ref);
-struct flat_shape *flat_shapes_from_itinerary(struct trip **trips, size_t n_trips,
-                                        struct stop* dep,
-                                        struct stop* arr,
-                                          struct hash_map *shape_map,
-                                          size_t n_shapes,
-                                          size_t *n_flat_shapes, size_t n_stops,
-                                          double lat_ref);
+struct flat_shape *flat_shapes_from_itinerary(
+        struct raptor_itinerary* itinerary,
+        struct hash_map *shape_map, size_t n_shapes, size_t *n_flat_shapes,
+        size_t n_stops, double lat_ref);
 
 void free_flat_shapes(struct flat_shape *shapes, size_t n_shapes);
 

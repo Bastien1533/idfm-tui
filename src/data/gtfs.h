@@ -162,7 +162,8 @@ struct trip **get_trips_from_csv(csv_file *csv, size_t *n_trips,
 struct stop_time **get_stop_times_from_csv(csv_file *csv, size_t *n_stop_times,
                                            struct hash_map *trip_map,
                                            struct hash_map *stop_map);
-struct shape **get_shapes_from_csv(csv_file *csv, size_t *n_shapes);
+struct shape **get_shapes_from_csv(csv_file *csv, size_t *n_shapes,
+                                   double *lat_ref);
 void associate_shape_route(struct trip **trips, size_t n_trips,
                            struct hash_map *shape_map);
 
