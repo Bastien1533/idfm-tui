@@ -120,7 +120,6 @@ static void receive_stop_res(scene_t *scene, ui_message *message)
         if (scene == NULL || message == NULL ||
             message->type != UI_STOP_RESULT_DATA)
                 return;
-        ncplane_printf(scene->plane, "%s", "received");
         for (size_t i = 0; i < scene->ctx->n_selectors; i++) {
                 ui_selector *selector = scene->ctx->selectors[i];
                 if (selector->pending_seq == message->seq) {
@@ -152,7 +151,6 @@ static void receive_itinerary_res(scene_t *scene, ui_message *message)
         if (scene == NULL || scene->payload == NULL || message == NULL ||
             message->type != UI_ITINERARY_RESULT_DATA)
                 return;
-        ncplane_printf(scene->plane, "%s", "received itinerary_data\n");
         itinerary_ctx *i_ctx = scene->payload;
         if (i_ctx->itinerary_req_result != NULL)
                 free_itinerary_result(i_ctx->itinerary_req_result);
@@ -212,7 +210,6 @@ void itinerary_send_stop_req(ui_input *ipt, void *payload)
         scene_t *scene = payload;
         scene->parent_ctx->ipc.request_seq++;
         ipt->child_selector->pending_seq = scene->parent_ctx->ipc.request_seq;
-        ncplane_printf(scene->plane, "%s", "sent");
         if (scene->ctx->focused_reader == NULL)
                 return;
         // write a request with parenctx ipc of scene

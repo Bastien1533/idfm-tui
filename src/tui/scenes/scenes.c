@@ -78,7 +78,6 @@ void on_input_click(scene_t *scene, ui_input *input)
 {
         if (scene == NULL || scene->ctx == NULL || input == NULL)
                 return;
-        ncplane_putstr(scene->plane, "Hey");
         scene->ctx->focused_reader = input;
 
         int y, x;
