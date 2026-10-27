@@ -1,7 +1,6 @@
 #include "tui/ui/map.h"
 #include "map/map.h"
 #include <notcurses/notcurses.h>
-#include "tui/utils.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -94,6 +93,8 @@ void free_map(ui_map *map)
         if (map->opts != NULL) {
                 free(map->opts);
         }
+        if (map->cells != NULL)
+                free(map->cells);
         ncplane_destroy(map->plane);
         free(map);
 }

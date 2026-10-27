@@ -79,7 +79,7 @@ struct flat_shape *gtfs_pathways_to_flat(struct pathway **pathways,
         double ymin = INT_MAX;
 
         struct flat_shape *out_shapes =
-                calloc(n_pathways, sizeof(struct pathway));
+                calloc(n_pathways, sizeof(struct flat_shape));
         if (out_shapes == NULL)
                 return NULL;
 
@@ -288,7 +288,7 @@ static size_t leg_to_stops_shapes(struct raptor_leg *leg,
                                 s, flat_shapes, cur_n_flat_shapes, lat_ref);
                 }
         }
-        return n;
+        return cur_n_flat_shapes;
 }
 
 struct flat_shape *flat_shapes_from_trips(struct trip **trips, size_t n_trips,

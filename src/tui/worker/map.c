@@ -5,6 +5,7 @@
 #include "tui/protocol.h"
 #include "data/gtfs.h"
 
+#include "tui/ui/map.h"
 #include "utils/hashmap.h"
 #include <notcurses/notcurses.h>
 #include <stdbool.h>
@@ -37,6 +38,8 @@ static size_t filter_trips(struct trip **trips, size_t n_trips,
                     hash_map_get(excluded_trips, t->trip_id) == NULL)
                         dst[new_n_trips++] = t;
         }
+        free_hashmap(included_trips);
+        free_hashmap(excluded_trips);
         return new_n_trips;
 }
 
@@ -52,6 +55,7 @@ struct shape_res *get_flat_shapes(struct trip **trips, size_t n_trips,
         struct flat_shape *flat_shapes = flat_shapes_from_trips(
                 filtered_trips, new_n_trips, shape_map, n_shapes,
                 &n_flat_shapes, n_stops, lat_ref);
+        free(filtered_trips);
         if (flat_shapes == NULL)
                 return NULL;
         struct shape_res *res = malloc(1 * sizeof(struct shape_res));
@@ -83,7 +87,7 @@ struct shape_res *get_itinerary_flat_shapes(struct raptor_itinerary *itinerary,
         struct flat_shape *flat_shapes =
                 flat_shapes_from_itinerary(itinerary, shape_map, n_shapes,
                                            &n_flat_shapes, n_stops, lat_ref);
-
+        free(filtered_trips);
         if (flat_shapes == NULL)
                 return NULL;
         struct shape_res *res = malloc(1 * sizeof(struct shape_res));

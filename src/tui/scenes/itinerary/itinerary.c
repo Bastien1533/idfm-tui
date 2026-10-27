@@ -1,4 +1,5 @@
 
+#include "tui/ui/map.h"
 #include <stdarg.h>
 #include <stddef.h>
 #include <stdlib.h>
@@ -108,6 +109,11 @@ void on_scene_itinerary_exit(scene_t *scene)
                         free(i_ctx->arr_stop_id);
                 if (i_ctx->itinerary_req_result) {
                         free_itinerary_result(i_ctx->itinerary_req_result);
+                }
+                if (i_ctx->map)
+                {
+                    free_flat_shapes(i_ctx->map->opts->shapes, i_ctx->map->opts->n_shapes);
+                    free_map(i_ctx->map);
                 }
                 i_ctx->dep_stop_id = NULL;
                 i_ctx->arr_stop_id = NULL;

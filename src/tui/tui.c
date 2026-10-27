@@ -1,3 +1,4 @@
+#include "map/shapes.h"
 #include "tui/protocol.h"
 #include "tui/ui/selector.h"
 #include <notcurses/notcurses.h>
@@ -162,6 +163,10 @@ int render(void)
                                         ctx->curr_scene->handle_message(
                                                 ctx->curr_scene, incoming_msg);
                                 } else {
+                                        free_flat_shapes(
+                                                incoming_msg->as.shapes->shapes,
+                                                incoming_msg->as.shapes
+                                                        ->n_shapes);
                                         free(incoming_msg->as.shapes);
                                         free(incoming_msg);
                                 }

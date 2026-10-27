@@ -50,6 +50,7 @@ static void escape_focused_itinerary(ui_selector *src, void *arg)
                 }
         }
         if (i_ctx->map != NULL) {
+            free_flat_shapes(i_ctx->map->opts->shapes, i_ctx->map->opts->n_shapes);
                 free_map(i_ctx->map);
                 i_ctx->map = NULL;
         }

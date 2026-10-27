@@ -115,6 +115,8 @@ bool cut_trip_flatshape(struct flat_shape shp, struct stop *dep,
                         struct stop *arr, double lat_ref,
                         struct flat_shape *new_shp)
 {
+        if (shp.type != LINE)
+                return false;
         double *cum;
         populate_cuml_len(&shp, &cum);
 
@@ -128,8 +130,10 @@ bool cut_trip_flatshape(struct flat_shape shp, struct stop *dep,
 
         get_along_distances(shp, dep_fp, arr_fp, cum, &low_along_dist,
                             &high_along_dist);
-        if (low_along_dist == -1 || high_along_dist == -1)
+        if (low_along_dist == -1 || high_along_dist == -1) {
+                free(cum);
                 return false;
+        }
 
         struct flat_pt *new_pts =
                 calloc(shp.as.line.n_pts, sizeof(struct flat_pt));

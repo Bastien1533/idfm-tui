@@ -1,4 +1,5 @@
 #include "data/gtfs.h"
+#include "map/shapes.h"
 #include "tui/ui/map.h"
 #include <stdarg.h>
 #include <stddef.h>
@@ -27,6 +28,8 @@ static void receive_map(scene_t *scene, ui_message *message)
 
         struct shape_res *res = message->as.shapes;
         if (res == NULL || res->shapes == NULL || res->n_shapes == 0) {
+                free_flat_shapes(message->as.shapes->shapes, message->as.shapes->n_shapes);
+                free(message->as.shapes);
                 free(message);
                 switch_scene(scene->parent_ctx,
                              hash_map_get(scene->parent_ctx->scenes_map,
@@ -55,6 +58,7 @@ static void receive_map(scene_t *scene, ui_message *message)
         unsigned map_h = rows > map_y + pad ? rows - map_y - pad : 0;
 
         if (m_ctx->map != NULL) {
+                free_flat_shapes(m_ctx->map->opts->shapes, m_ctx->map->opts->n_shapes);
                 free_map(m_ctx->map);
                 m_ctx->map = NULL;
         }
@@ -77,7 +81,7 @@ static void receive_map(scene_t *scene, ui_message *message)
         }
 
         ui_draw_map(m_ctx->map);
-
+        free(message->as.shapes);
         free(message);
 }
 

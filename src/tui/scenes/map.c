@@ -4,6 +4,7 @@
 #include "tui/msg.h"
 #include "tui/protocol.h"
 #include "utils/hashmap.h"
+#include <stddef.h>
 #include <stdlib.h>
 #include <stdbool.h>
 #include <notcurses/notcurses.h>
@@ -18,17 +19,19 @@ static void receive_shape_res(scene_t *scene, ui_message *message)
                 return;
 
         struct shape_res *res = message->as.shapes;
-        if (res == NULL || res->shapes == NULL || res->n_shapes == 0) {
+        map_ctx *m_ctx = scene->payload;
+
+        if (res == NULL || res->shapes == NULL || res->n_shapes == 0 ||
+            m_ctx->pending_seq != message->seq) {
+                free_flat_shapes(message->as.shapes->shapes,
+                                 message->as.shapes->n_shapes);
+                free(message->as.shapes);
                 free(message);
                 switch_scene(scene->parent_ctx,
                              hash_map_get(scene->parent_ctx->scenes_map,
                                           "menu_scene"));
                 return;
         }
-
-        map_ctx *m_ctx = scene->payload;
-        if (m_ctx->pending_seq != message->seq)
-                return;
 
         unsigned rows, cols;
         ncplane_dim_yx(scene->parent, &rows, &cols);
@@ -48,10 +51,14 @@ static void receive_shape_res(scene_t *scene, ui_message *message)
                 struct ui_map *map =
                         create_map(scene->plane, &motps, scene->nc);
                 m_ctx->map = map;
+                free(message->as.shapes);
+        } else {
+                free_flat_shapes(message->as.shapes->shapes,
+                                 message->as.shapes->n_shapes);
+                free(message->as.shapes);
         }
 
         ui_draw_map(m_ctx->map);
-
         free(message);
 }
 
@@ -91,7 +98,9 @@ void scene_map_on_enter(scene_t *scene)
                                          .name = "scene_map_plane" };
         on_scene_enter(scene, &nopts);
 
-        send_shape_req(scene);
+        struct map_ctx *m_ctx = scene->payload;
+        if (!m_ctx->map)
+                send_shape_req(scene);
         return;
 }
 
