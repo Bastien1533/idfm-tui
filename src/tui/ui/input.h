@@ -34,6 +34,7 @@ void move_input(ui_input *btn, int x, int y);
 ui_input *create_input(struct ncplane *parent, ui_input_opts *input_opts);
 ui_input *add_input(struct ncplane *parent, ui_input ***input_array,
                     size_t *input_n, ui_input_opts *opts);
+void set_input_text(ui_input *ipt, const char *str);
 void free_input(ui_input *btn);
 
 #endif

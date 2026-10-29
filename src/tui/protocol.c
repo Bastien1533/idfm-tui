@@ -12,6 +12,7 @@ void free_search_res(search_res *res)
                         free((void *)res->items[i]->option);
                         free(res->items[i]);
                 }
+                free(res->orig_items);
                 free(res->items);
         }
         free(res);

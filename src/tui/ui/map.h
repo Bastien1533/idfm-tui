@@ -33,6 +33,7 @@ typedef struct ui_map {
         struct map_view view;
         ui_map_opts *opts;
         struct notcurses *nc;
+        bool focused;
 
 } ui_map;
 

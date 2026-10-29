@@ -34,7 +34,7 @@ void add_itinerary_item_selector(ui_selector *selector, char type, char *id,
                         free_selector_item(item);
                 } else {
                         item->option = opt;
-                        stat = uiselector_add_item(selector, item);
+                        stat = uiselector_add_item(selector, item, NULL);
                         if (stat == 1)
                                 free_selector_item(item);
                 }

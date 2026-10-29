@@ -39,8 +39,6 @@ char **raptor_to_strings(struct raptor_result *res, size_t *n_res)
                                 continue;
                         }
                         if (leg->trip != NULL) {
-                                char *hhmmss_dep = print_hhmmss(leg->dep_time);
-                                char *hhmmss_arr = print_hhmmss(leg->arr_time);
                                 if (j == 2) {
                                         char *dst = NULL;
                                         asprintf(&dst, "%s%s || %s || %s", str,
@@ -61,8 +59,6 @@ char **raptor_to_strings(struct raptor_result *res, size_t *n_res)
                                         free(str);
                                         str = dst;
                                 }
-                                free(hhmmss_dep);
-                                free(hhmmss_arr);
                         }
                         /*if (leg->transfer != NULL) {
                                 asprintf(&str, "%sTransfer | %hu min \n", str,
@@ -70,6 +66,14 @@ char **raptor_to_strings(struct raptor_result *res, size_t *n_res)
                                           60));
                         } */
                 }
+                char *hhmmss_dep = print_hhmmss(itinerary->dep_time);
+                char *hhmmss_arr = print_hhmmss(itinerary->arr_time);
+                char *dst = NULL;
+                asprintf(&dst, "%s (%s -> %s)", str, hhmmss_dep, hhmmss_arr);
+                free(str);
+                free(hhmmss_dep);
+                free(hhmmss_arr);
+                str = dst;
                 res_str[i] = str;
         }
         *n_res = res->n_itineraries;

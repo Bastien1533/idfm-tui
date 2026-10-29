@@ -1,4 +1,6 @@
 
+#include "map/map.h"
+#include "tui/protocol.h"
 #include "tui/ui/map.h"
 #include <stdarg.h>
 #include <stddef.h>
@@ -24,6 +26,41 @@ static void go_menu(void *payload)
                 return;
         switch_scene(scene->parent_ctx,
                      hash_map_get(scene->parent_ctx->scenes_map, "menu_scene"));
+}
+
+void handle_itinerary_scene_input(scene_t *self, const ncinput *ni,
+                                  uint32_t key)
+{
+        if (self == NULL || ni == NULL || self->ctx == NULL)
+                return;
+        bool is_repeat = (ni->evtype == NCTYPE_REPEAT);
+        bool is_press = (ni->evtype == NCTYPE_PRESS);
+
+        struct itinerary_ctx *m_ctx = self->payload;
+
+        bool is_map_scroll_keys = key == NCKEY_SCROLL_DOWN ||
+                                  key == NCKEY_SCROLL_UP;
+        bool is_map_click_keys = key == NCKEY_BUTTON1;
+        bool is_map_ctrl_keys = key == NCKEY_LEFT || key == NCKEY_RIGHT ||
+                                key == NCKEY_UP || key == NCKEY_DOWN;
+        bool is_in_map = (m_ctx != NULL && m_ctx->map != NULL) &&
+                         ((ni->x) >= m_ctx->map->opts->x &&
+                          (size_t)(ni->x) <= m_ctx->map->opts->x +
+                                                     m_ctx->map->opts->cols) &&
+                         ((ni->y) >= m_ctx->map->opts->y &&
+                          (size_t)(ni->y) <=
+                                  m_ctx->map->opts->y + m_ctx->map->opts->rows);
+        bool has_map = m_ctx && m_ctx->map;
+
+        if (has_map && is_map_click_keys && is_press)
+                m_ctx->map->focused = is_in_map;
+        if (has_map && ((is_map_scroll_keys && is_in_map) ||
+                        (m_ctx->map->focused && is_map_ctrl_keys))) {
+                handle_map_input(ni, key, &m_ctx->map->view);
+                ui_draw_map(m_ctx->map);
+        } else {
+                handle_scene_input(self, ni, key);
+        }
 }
 
 void scene_itinerary_on_enter(scene_t *scene)
@@ -110,10 +147,11 @@ void on_scene_itinerary_exit(scene_t *scene)
                 if (i_ctx->itinerary_req_result) {
                         free_itinerary_result(i_ctx->itinerary_req_result);
                 }
-                if (i_ctx->map)
-                {
-                    free_flat_shapes(i_ctx->map->opts->shapes, i_ctx->map->opts->n_shapes);
-                    free_map(i_ctx->map);
+                if (i_ctx->map) {
+                        free_flat_shapes(i_ctx->map->opts->shapes,
+                                         i_ctx->map->opts->n_shapes);
+                        free_map(i_ctx->map);
+                        i_ctx->map = NULL;
                 }
                 i_ctx->dep_stop_id = NULL;
                 i_ctx->arr_stop_id = NULL;
@@ -158,7 +196,7 @@ scene_t *create_itinerary_scene(struct notcurses *nc,
         scene->parent_ctx = parent_ctx;
         scene->parent = parent_plane;
         scene->payload = itinerary_payload;
-        scene->handle_input = handle_scene_input;
+        scene->handle_input = handle_itinerary_scene_input;
         scene->on_enter = scene_itinerary_on_enter;
         scene->on_exit = on_scene_itinerary_exit;
         scene->handle_message = itinerary_receive_messages;

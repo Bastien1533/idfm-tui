@@ -11,6 +11,7 @@
 #include "tui/worker/map.h"
 
 #include <fcntl.h>
+#include <stddef.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -208,9 +209,14 @@ void *logic_worker(void *arg)
                                 free(incoming_req);
                                 break;
                         } else if (incoming_req->type == LOGIC_TASK_STOP_REQ) {
-                                struct search_res *res = get_search_stops(
-                                        &incoming_req->stop_req, wdata->stops,
-                                        wdata->n_stops);
+                                size_t out_match_n;
+                                struct matching_item **m_items =
+                                        perform_stop_search(
+                                                &incoming_req->stop_req,
+                                                wdata->stops, wdata->n_stops,
+                                                &out_match_n);
+                                search_res *res = format_stop_search_results(
+                                        m_items, out_match_n, wdata->n_stops);
                                 if (res != NULL) {
                                         send_search_res_ui(wargs->pipe_ui_fd,
                                                            incoming_req->seq,

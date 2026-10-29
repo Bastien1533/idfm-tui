@@ -146,7 +146,8 @@ ui_selector *add_selector(struct ncplane *parent, struct ui_input *parent_input,
         return ipt;
 }
 
-int uiselector_add_item(ui_selector *sel, struct ncselector_item *item)
+int uiselector_add_item(ui_selector *sel, struct ncselector_item *item,
+                        void *orig_item)
 {
         if (sel == NULL || sel->selector == NULL || item == NULL ||
             (sel->items == NULL && sel->n_items > 0))
@@ -154,9 +155,13 @@ int uiselector_add_item(ui_selector *sel, struct ncselector_item *item)
         struct ncselector_item **t_items =
                 realloc(sel->items,
                         (sel->n_items + 1) * sizeof(struct ncselector_item *));
-        if (t_items == NULL)
+        void **t_orig_items =
+                realloc(sel->orig_items, (sel->n_items + 1) * sizeof(void *));
+        if (t_items == NULL || t_orig_items == NULL)
                 return 1;
+        sel->orig_items = t_orig_items;
         sel->items = t_items;
+        sel->orig_items[sel->n_items] = orig_item;
         sel->items[sel->n_items++] = item;
         ncselector_additem(sel->selector, item);
         return 0;
@@ -184,6 +189,8 @@ ui_selector *hide_selector(ui_selector *ui_sel)
         ui_sel->box_plane = NULL;
         ui_sel->visible = false;
         free_selector_items(&ui_sel->items, &ui_sel->n_items);
+        free(ui_sel->orig_items);
+        ui_sel->orig_items = NULL;
         return ui_sel;
 }
 
@@ -206,6 +213,7 @@ void free_selector(ui_selector *ipt)
         ncselector_destroy(ipt->selector, NULL);
         ncplane_destroy(ipt->box_plane);
         free_selector_items(&ipt->items, &ipt->n_items);
+        free(ipt->orig_items);
         free(ipt);
 }
 

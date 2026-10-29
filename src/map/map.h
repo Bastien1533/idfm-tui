@@ -42,6 +42,9 @@ struct map_view {
         double cy;
         double cx;
 
+        double origin_x;
+        double origin_y;
+
         size_t rows;
         size_t cols;
 
@@ -67,7 +70,8 @@ void map_fit_shapes(struct map_view *view, struct flat_shape *shapes,
 void draw_map(size_t n_shapes, struct flat_shape *flat_shapes,
               struct map_view view, struct map_cell **cells,
               struct ncplane *base_plane);
-struct map_view map_init(size_t rows, size_t cols, double lat_ref);
+struct map_view map_init(size_t rows, size_t cols, double lat_ref,
+                         double origin_x, double origin_y);
 void handle_map_input(const ncinput *ni, uint32_t key, struct map_view *view);
 
 void map_print_frame(struct map_view *view, struct map_cell *cells,

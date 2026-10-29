@@ -8,11 +8,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-struct matching_item {
-        int dist;
-        struct ncselector_item *item;
-};
-
 int matching_itm_cmp(const void *s1, const void *s2)
 {
         const struct matching_item *m1 =
@@ -80,15 +75,16 @@ char *get_station_desc(struct stop *stop)
         return desc;
 }
 
-struct search_res *get_search_stops(logic_task_stop_req *request,
-                                    struct stop **stops, size_t n_stops)
+struct matching_item **perform_stop_search(logic_task_stop_req *request,
+                                           struct stop **stops, size_t n_stops,
+                                           size_t *out_match_n)
 {
-        size_t max_n = (n_stops < 10) ? n_stops : 10;
-
         struct matching_item **matching_items =
                 calloc(n_stops, sizeof(struct matching_item *));
-        if (matching_items == NULL)
+        if (matching_items == NULL) {
+                *out_match_n = 0;
                 return NULL;
+        }
 
         size_t match_n = 0;
         for (size_t i = 0; i < n_stops; i++) {
@@ -102,6 +98,7 @@ struct search_res *get_search_stops(logic_task_stop_req *request,
                         calloc(1, sizeof(struct matching_item));
                 if (match_item == NULL)
                         continue;
+
                 struct ncselector_item *item =
                         calloc(1, sizeof(struct ncselector_item));
                 if (item == NULL) {
@@ -111,53 +108,86 @@ struct search_res *get_search_stops(logic_task_stop_req *request,
 
                 item->desc = get_station_desc(stops[i]);
                 item->option = strdup(stops[i]->stop_id);
+
                 match_item->item = item;
+                /* Transport the original stop pointer */
+                match_item->orig_item = (void *)stops[i];
+
                 match_item->dist =
                         (int)(strcasestr(s->stop_name, request->stop_name) -
                               s->stop_name) *
                                 1000 +
                         (int)(strlen(s->stop_name) -
                               strlen(request->stop_name));
+
                 matching_items[i] = match_item;
                 match_n++;
         }
+
         if (match_n > 0) {
                 qsort(matching_items, n_stops, sizeof(struct matching_item *),
                       matching_itm_cmp);
+        }
 
-                struct ncselector_item **items =
-                        calloc(match_n, sizeof(struct ncselector_item *));
-                if (items == NULL) {
+        *out_match_n = match_n;
+        return matching_items;
+}
+
+search_res *format_stop_search_results(struct matching_item **matching_items,
+                                       size_t match_n, size_t n_stops)
+{
+        size_t max_n = (n_stops < 10) ? n_stops : 10;
+
+        search_res *result = calloc(1, sizeof(search_res));
+        if (result == NULL) {
+                if (matching_items != NULL) {
                         free_matching_items(matching_items, n_stops, true);
-                        return NULL;
+                        free(matching_items);
                 }
-                size_t i = 0;
-                size_t j = 0;
-                while (i < match_n && j < max_n) {
-                        if (matching_items[i] != NULL) {
-                                items[i] = matching_items[i]->item;
-                                j++;
-                        }
-                        i++;
-                }
-                free_matching_items(matching_items, i, false);
-                free_matching_items(matching_items + i, match_n - i, true);
-                free(matching_items);
+                return NULL;
+        }
 
-                search_res *result = calloc(1, sizeof(search_res));
-                if (result == NULL)
-                        return NULL;
-
-                result->items = items;
-                result->n_res = j;
-                return result;
-        } else {
-                search_res *result = calloc(1, sizeof(search_res));
-                if (result == NULL)
-                        return NULL;
-
+        if (match_n == 0 || matching_items == NULL) {
                 result->items = NULL;
+                result->orig_items = NULL;
                 result->n_res = 0;
+                free(matching_items);
                 return result;
         }
+
+        /* Allocate arrays for both the selector items and the original stops */
+        struct ncselector_item **items =
+                calloc(match_n, sizeof(struct ncselector_item *));
+        void **orig_items = calloc(match_n, sizeof(void *));
+
+        if (items == NULL || orig_items == NULL) {
+                free(items);
+                free(orig_items);
+                free_matching_items(matching_items, n_stops, true);
+                free(matching_items);
+                free(result);
+                return NULL;
+        }
+
+        size_t i = 0;
+        size_t j = 0;
+        while (i < match_n && j < max_n) {
+                if (matching_items[i] != NULL) {
+                        items[j] = matching_items[i]->item;
+                        orig_items[j] = matching_items[i]->orig_item;
+                        j++;
+                }
+                i++;
+        }
+
+        /* Cleanup the matching_items array */
+        free_matching_items(matching_items, i, false);
+        free_matching_items(matching_items + i, match_n - i, true);
+        free(matching_items);
+
+        result->items = items;
+        result->orig_items = orig_items;
+        result->n_res = j;
+
+        return result;
 }

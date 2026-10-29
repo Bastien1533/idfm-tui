@@ -1,4 +1,5 @@
 #include "data/gtfs.h"
+#include "data/rules.h"
 #include "utils/csv.h"
 #include "utils/hashmap.h"
 #include "utils/utils.h"
@@ -411,6 +412,7 @@ struct stop **get_stops_from_csv(csv_file *csv, size_t *n_stops)
 
                 s->assoc_routes = NULL;
                 s->n_assoc_routes = 0;
+                s->stop_role = STOP_ROLE_DEFAULT;
 
                 stop_count++;
                 s->idx = r;

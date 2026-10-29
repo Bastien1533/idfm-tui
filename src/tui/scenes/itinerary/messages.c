@@ -28,7 +28,8 @@ static void receive_map(scene_t *scene, ui_message *message)
 
         struct shape_res *res = message->as.shapes;
         if (res == NULL || res->shapes == NULL || res->n_shapes == 0) {
-                free_flat_shapes(message->as.shapes->shapes, message->as.shapes->n_shapes);
+                free_flat_shapes(message->as.shapes->shapes,
+                                 message->as.shapes->n_shapes);
                 free(message->as.shapes);
                 free(message);
                 switch_scene(scene->parent_ctx,
@@ -58,7 +59,8 @@ static void receive_map(scene_t *scene, ui_message *message)
         unsigned map_h = rows > map_y + pad ? rows - map_y - pad : 0;
 
         if (m_ctx->map != NULL) {
-                free_flat_shapes(m_ctx->map->opts->shapes, m_ctx->map->opts->n_shapes);
+                free_flat_shapes(m_ctx->map->opts->shapes,
+                                 m_ctx->map->opts->n_shapes);
                 free_map(m_ctx->map);
                 m_ctx->map = NULL;
         }
@@ -128,8 +130,9 @@ static void receive_stop_res(scene_t *scene, ui_message *message)
                                 struct ncselector_item *n_item =
                                         clone_selector_item(
                                                 message->as.res->items[i]);
-                                int stat =
-                                        uiselector_add_item(selector, n_item);
+                                int stat = uiselector_add_item(
+                                        selector, n_item,
+                                        message->as.res->orig_items[i]);
                                 if (stat == 1)
                                         free_selector_item(n_item);
                         }
@@ -181,7 +184,8 @@ static void receive_itinerary_res(scene_t *scene, ui_message *message)
                                 i_ctx->itinerary_req_result->search_items[i]);
                         if (item != NULL) {
                                 int stat = uiselector_add_item(
-                                        i_ctx->itinerary_res_selector, item);
+                                        i_ctx->itinerary_res_selector, item,
+                                        NULL);
                                 if (stat == 1)
                                         free_selector_item(item);
                         }

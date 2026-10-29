@@ -1,6 +1,7 @@
 #include "tui/ui/map.h"
 #include "map/map.h"
 #include <notcurses/notcurses.h>
+#include <stdbool.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -77,8 +78,10 @@ ui_map *create_map(struct ncplane *parent, ui_map_opts *opts,
         map->parent = parent;
         map->cells = calloc(opts->rows * opts->cols, sizeof(struct map_cell));
         map->nc = nc;
+        map->focused = false;
 
-        struct map_view view = map_init(opts->rows, opts->cols, opts->lat_ref);
+        struct map_view view = map_init(opts->rows, opts->cols, opts->lat_ref,
+                                        opts->x, opts->y);
         map->view = view;
 
         ui_map_fit_shapes(map);

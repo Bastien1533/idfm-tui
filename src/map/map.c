@@ -109,16 +109,21 @@ void map_fit_shapes(struct map_view *view, struct flat_shape *shapes,
         map_fit(view, bbox);
 }
 
-struct map_view map_init(size_t rows, size_t cols, double lat_ref)
+struct map_view map_init(size_t rows, size_t cols, double lat_ref,
+                         double origin_x, double origin_y)
 {
-        struct map_view view = { .aspect = 0.5,
-                                 .cols = cols,
-                                 .rows = rows,
-                                 .cx = cols / 2,
-                                 .cy = rows / 2,
-                                 .u_cols = cols,
-                                 .u_rows = rows,
-                                 .scale = 1 };
+        struct map_view view = {
+                .aspect = 0.5,
+                .cols = cols,
+                .rows = rows,
+                .cx = cols / 2,
+                .cy = rows / 2,
+                .u_cols = cols,
+                .u_rows = rows,
+                .scale = 1,
+                .origin_x = origin_x,
+                .origin_y = origin_y,
+        };
         return view;
 }
 
@@ -181,11 +186,13 @@ void handle_map_input(const ncinput *ni, uint32_t key, struct map_view *view)
                 return;
         }
         if (key == '=' || key == NCKEY_SCROLL_DOWN) {
-                map_zoom(view, 1.1, ni->x, ni->y);
+                map_zoom(view, 1.1, ni->x - view->origin_x,
+                         ni->y - view->origin_y);
                 return;
         }
         if (key == '-' || key == NCKEY_SCROLL_UP) {
-                map_zoom(view, 0.9, ni->x, ni->y);
+                map_zoom(view, 0.9, ni->x - view->origin_x,
+                         ni->y - view->origin_y);
                 return;
         }
 }
@@ -218,7 +225,7 @@ void map_render_loop(void)
         notcurses_term_dim_yx(nc, &rows, &cols);
         notcurses_mice_enable(nc, NCMICE_ALL_EVENTS);
 
-        struct map_view view = map_init(rows, cols, wdata->lat_ref);
+        struct map_view view = map_init(rows, cols, wdata->lat_ref, 0, 0);
         struct flat_pt a = geo_to_flat((struct geo_pt){ .lon = 13.3951309,
                                                         .lat = 51.5173885 },
                                        wdata->lat_ref);

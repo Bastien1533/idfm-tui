@@ -1,10 +1,13 @@
+#include "tui/ui/selector.h"
 #include <notcurses/notcurses.h>
 #include "tui/ui/input.h"
 #include "tui/utils.h"
 
+#include <stddef.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <errno.h>
+#include <string.h>
 
 void move_input(ui_input *ipt, int x, int y)
 {
@@ -101,6 +104,22 @@ ui_input *add_input(struct ncplane *parent, ui_input ***input_array,
         (*input_array)[*input_n] = ipt;
         (*input_n)++;
         return ipt;
+}
+
+void set_input_text(ui_input *ipt, const char *str)
+{
+        if (ipt == NULL || str == NULL)
+                return;
+        ncreader_clear(ipt->reader);
+        for (size_t i = 0; i < strlen(str);) {
+                unsigned char c = str[i];
+                size_t len = c < 0x80 ? 1 : c < 0xE0 ? 2 : c < 0xF0 ? 3 : 4;
+                char egc[5];
+                memcpy(egc, str + i, len);
+                egc[len] = '\0';
+                ncreader_write_egc(ipt->reader, egc);
+                i += len;
+        }
 }
 
 void free_input(ui_input *ipt)

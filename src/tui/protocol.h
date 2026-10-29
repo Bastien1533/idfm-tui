@@ -21,8 +21,9 @@ typedef struct {
 } ui_message_log;
 
 typedef struct search_res {
-        size_t n_res;
         struct ncselector_item **items;
+        void **orig_items;
+        size_t n_res;
 } search_res;
 
 typedef struct shape_res {

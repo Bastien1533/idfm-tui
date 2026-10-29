@@ -819,7 +819,6 @@ void format_raptor(struct raptor_result *res)
 {
         if (res == NULL || res->dep == NULL || res->arr == NULL ||
             res->itineraries == NULL) {
-                printf("Fuck");
                 return;
         }
 

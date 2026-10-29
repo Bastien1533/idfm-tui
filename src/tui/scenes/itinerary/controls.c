@@ -19,8 +19,7 @@
 void itinerary_show_assoc_selector(ui_input *ipt, void *payload)
 {
         ui_scene_ctx *scene_ctx = (ui_scene_ctx *)payload;
-        if (ipt == NULL || ipt->child_selector == NULL ||
-            ipt->child_selector->visible == true || scene_ctx == NULL)
+        if (ipt == NULL || ipt->child_selector == NULL || scene_ctx == NULL)
                 return;
         for (size_t i = 0; i < scene_ctx->n_selectors; i++) {
                 if (scene_ctx->selectors[i]->parent_input != NULL || 1 == 1)
@@ -43,14 +42,16 @@ static void escape_focused_itinerary(ui_selector *src, void *arg)
                                 i_ctx->itinerary_req_result->search_items[i]);
                         if (item != NULL) {
                                 int stat = uiselector_add_item(
-                                        i_ctx->itinerary_res_selector, item);
+                                        i_ctx->itinerary_res_selector, item,
+                                        NULL);
                                 if (stat == 1)
                                         free_selector_item(item);
                         }
                 }
         }
         if (i_ctx->map != NULL) {
-            free_flat_shapes(i_ctx->map->opts->shapes, i_ctx->map->opts->n_shapes);
+                free_flat_shapes(i_ctx->map->opts->shapes,
+                                 i_ctx->map->opts->n_shapes);
                 free_map(i_ctx->map);
                 i_ctx->map = NULL;
         }
@@ -185,7 +186,12 @@ void itinerary_on_stop_select(ui_selector *sel, void *arg)
                 char **slot = arg;
                 free(*slot);
                 *slot = strdup(selected);
-                ncplane_printf(sel->parent_plane, "%s", *slot);
+                for (size_t i = 0; i < sel->n_items; i++) {
+                        if (strcmp(sel->items[i]->option, selected) == 0) {
+                                struct stop *s = sel->orig_items[i];
+                                set_input_text(sel->parent_input, s->stop_name);
+                        }
+                }
         }
         hide_selector(sel);
 }

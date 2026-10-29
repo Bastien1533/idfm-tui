@@ -47,6 +47,7 @@ struct stop {
         unsigned short int zone_id;
         char *stop_url;
         enum location_type location_type;
+        enum stop_role stop_role;
 
         char *parent_station_id;
         struct stop *parent_station;

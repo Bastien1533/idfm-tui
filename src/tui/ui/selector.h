@@ -32,6 +32,7 @@ typedef struct ui_selector {
         struct ncplane *parent_plane;
 
         struct ncselector_item **items;
+        void **orig_items;
         size_t n_items;
 
         ui_selector_opts *opts;
@@ -51,7 +52,8 @@ void free_selector(ui_selector *selector);
 struct ncselector_item *clone_selector_item(const struct ncselector_item *src);
 void free_selector_item(struct ncselector_item *item);
 void free_selector_items(struct ncselector_item ***items, size_t *n_items);
-int uiselector_add_item(ui_selector *sel, struct ncselector_item *item);
+int uiselector_add_item(ui_selector *sel, struct ncselector_item *item,
+                        void *orig_item);
 ui_selector *reset_selector(ui_selector *ui_sel);
 ui_selector *show_selector(ui_selector *ui_sel);
 ui_selector *hide_selector(ui_selector *ui_sel);

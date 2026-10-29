@@ -1,5 +1,6 @@
 #include "algo/raptor.h"
 #include "data/gtfs.h"
+#include "data/rules.h"
 #include "map/style.h"
 #include "map/trip_cut.h"
 #include "utils/hashmap.h"
@@ -239,7 +240,8 @@ static size_t trip_to_stops_shapes(struct trip *trip,
         return cur_n_flat_shapes;
 }
 
-static size_t leg_to_stops_shapes(struct raptor_leg *leg,
+static size_t leg_to_stops_shapes(struct raptor_leg *leg, struct stop *pdep,
+                                  struct stop *parr,
                                   struct hash_map *seen_stops, double lat_ref,
                                   struct flat_shape *flat_shapes, size_t n)
 {
@@ -278,8 +280,15 @@ static size_t leg_to_stops_shapes(struct raptor_leg *leg,
                         continue;
                 uintptr_t mark = 1;
                 hash_map_insert(seen_stops, ps->stop_id, (void *)mark);
+                if (ps == pdep)
+                        ps->stop_role = STOP_ROLE_DEP;
+                else if (ps == parr)
+                        ps->stop_role = STOP_ROLE_ARR;
+                else
+                        ps->stop_role = STOP_ROLE_INTERMEDIATE;
                 cur_n_flat_shapes = stop_to_flat_shape(
                         ps, flat_shapes, cur_n_flat_shapes, lat_ref);
+                ps->stop_role = STOP_ROLE_DEFAULT;
 
                 for (size_t j = 0; j < ps->n_children; j++) {
                         struct stop *s = ps->child_stops[j];
@@ -343,6 +352,17 @@ struct flat_shape *flat_shapes_from_itinerary(
                 sizeof(struct flat_shape)); // Worst case: n shapes, n stops * (1 circle + 1 label)
         *n_flat_shapes = 0;
 
+        struct stop *pdep =
+                itinerary->legs[0]->from->stop->parent_station ?
+                        itinerary->legs[0]->from->stop->parent_station :
+                        itinerary->legs[0]->from->stop;
+        struct stop *parr =
+                itinerary->legs[itinerary->n_legs - 1]
+                                ->to->stop->parent_station ?
+                        itinerary->legs[itinerary->n_legs - 1]
+                                ->to->stop->parent_station :
+                        itinerary->legs[itinerary->n_legs - 1]->to->stop;
+
         struct hash_map *seen_shapes = init_hashmap(itinerary->n_trips);
         struct hash_map *seen_stops = init_hashmap(n_stops);
         for (size_t i = 0; i < itinerary->n_legs; i++) {
@@ -360,8 +380,10 @@ struct flat_shape *flat_shapes_from_itinerary(
                         line = cut; /* cut failed → keep FULL line */
 
                 flat_shapes[(*n_flat_shapes)++] = line;
-                *n_flat_shapes = leg_to_stops_shapes(
-                        leg, seen_stops, lat_ref, flat_shapes, *n_flat_shapes);
+                *n_flat_shapes = leg_to_stops_shapes(leg, pdep, parr,
+                                                     seen_stops, lat_ref,
+                                                     flat_shapes,
+                                                     *n_flat_shapes);
         }
         flat_shapes = realloc(flat_shapes,
                               *n_flat_shapes * sizeof(struct flat_shape));
