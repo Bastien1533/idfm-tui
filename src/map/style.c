@@ -56,17 +56,29 @@ void get_stop_min_max_scale(enum location_type location_type,
                 min_scale_t = 300;
                 break;
         }
-        if ((stop_role == STOP_ROLE_DEP || stop_role == STOP_ROLE_ARR ||
-             stop_role == STOP_ROLE_TRANSFER) &&
+        if ((stop_role == STOP_ROLE_DEP || stop_role == STOP_ROLE_ARR) &&
             location_type == STATION)
                 min_scale_t = -1;
+        if (stop_role == STOP_ROLE_TRANSFER)
+                min_scale_t = 10;
+
         *min_scale = min_scale_t;
         *max_scale = max_scale_t;
 }
 
+double get_stop_radius(enum location_type location_type, enum stop_role role)
+{
+        double radius = 1;
+        if (location_type == STATION)
+                radius = 2;
+        if (role == STOP_ROLE_TRANSFER || role == STOP_ROLE_INTERMEDIATE)
+                radius = 1;
+        return radius;
+}
+
 struct shape_style style_stop(const struct stop *s)
 {
-        double radius = s->location_type == STATION ? 2 : 1;
+        double radius = get_stop_radius(s->location_type, s->stop_role);
         uint32_t color = get_stop_color(s->location_type, s->stop_role);
 
         int min_scale;

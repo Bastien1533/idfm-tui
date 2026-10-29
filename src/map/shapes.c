@@ -287,6 +287,9 @@ static size_t leg_to_stops_shapes(struct raptor_leg *leg, struct stop *pdep,
                         ps->stop_role = STOP_ROLE_DEP;
                 else if (ps == parr)
                         ps->stop_role = STOP_ROLE_ARR;
+                else if (st->stop == leg->from->stop ||
+                         st->stop == leg->to->stop)
+                        ps->stop_role = STOP_ROLE_TRANSFER;
                 else
                         ps->stop_role = STOP_ROLE_INTERMEDIATE;
                 cur_n_flat_shapes = stop_to_flat_shape(
