@@ -52,6 +52,7 @@ struct flat_shape {
 
         double min_scale;
         double max_scale;
+        double z_index;
 };
 
 struct flat_shape gtfs_shape_to_flat(gfts_shp *shape, double lat_ref,

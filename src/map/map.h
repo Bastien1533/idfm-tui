@@ -28,6 +28,7 @@ struct map_cell {
         uint32_t ch;
         double min_scale;
         double max_scale;
+        double z_index;
 };
 
 struct bbox {

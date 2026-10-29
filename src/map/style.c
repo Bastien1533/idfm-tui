@@ -80,6 +80,7 @@ struct shape_style style_stop(const struct stop *s)
                 .max_scale = max_scale,
                 .min_scale = min_scale,
                 .radius = radius,
+                .z_index = 2,
         };
         return style;
 }
@@ -95,6 +96,7 @@ struct shape_style style_route(const struct route *r)
                 .max_scale = -1,
                 .min_scale = -1,
                 .radius = -1,
+                .z_index = 1,
         };
         return style;
 }

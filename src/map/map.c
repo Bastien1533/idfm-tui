@@ -42,9 +42,9 @@ void map_print_frame_nc(struct map_view *view, struct map_cell *cells,
                              cell->max_scale == -1) &&
                             (view->scale > cell->min_scale ||
                              cell->min_scale == -1)) {
-                                nccell_load_char(plane, &c, cell->ch);
+                                nccell_load_egc32(plane, &c, cell->ch);
                         } else {
-                                nccell_load_char(plane, &c, ' ');
+                                nccell_load_egc32(plane, &c, ' ');
                         }
                         nccell_set_fg_rgb(&c, cell->fg);
                         nccell_set_bg_rgb(&c, cell->bg);

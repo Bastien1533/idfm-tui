@@ -62,7 +62,8 @@ struct flat_shape gtfs_shape_to_flat(gfts_shp *shape, double lat_ref,
                 },
                 .min_scale = style.min_scale,
                 .max_scale = style.max_scale,
-                .color = style.color
+                .color = style.color,
+                .z_index = style.z_index,
         };
         return flat_shape;
 }
@@ -147,6 +148,7 @@ static struct flat_shape stop_to_label(struct stop *stop, double lat_ref,
                 .as.text.my = my,
                 .min_scale = style.min_scale,
                 .max_scale = style.max_scale,
+                .z_index = style.z_index,
         };
         return shape;
 }
@@ -171,6 +173,7 @@ static struct flat_shape stop_to_circle(struct stop *stop, double lat_ref,
         },
         .min_scale = style.min_scale,
         .max_scale = style.max_scale,
+        .z_index = style.z_index,
     };
         return shape;
 }

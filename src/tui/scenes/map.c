@@ -42,10 +42,10 @@ static void receive_shape_res(scene_t *scene, ui_message *message)
                 ui_map_opts motps = {
                         .n_shapes = message->as.shapes->n_shapes,
                         .shapes = message->as.shapes->shapes,
-                        .rows = rows - 5,
-                        .cols = cols - 10,
-                        .x = 5,
-                        .y = 2,
+                        .rows = rows - 2,
+                        .cols = cols - 5,
+                        .x = 2,
+                        .y = 1,
                         .lat_ref = message->as.shapes->lat_ref,
                 };
                 struct ui_map *map =
