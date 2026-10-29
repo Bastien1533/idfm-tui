@@ -5,6 +5,29 @@
 #include <string.h>
 #include <stdbool.h>
 
+#define BUF_SIZE 65536
+
+int count_lines(FILE *file)
+{
+        char buf[BUF_SIZE];
+        int counter = 0;
+        for (;;) {
+                size_t res = fread(buf, 1, BUF_SIZE, file);
+                if (ferror(file))
+                        return -1;
+
+                size_t i;
+                for (i = 0; i < res; i++)
+                        if (buf[i] == '\n')
+                                counter++;
+
+                if (feof(file))
+                        break;
+        }
+
+        return counter;
+}
+
 char **parse_csv_line(char *line, size_t *out_cols, const char delimiter,
                       long col_count_i)
 {
@@ -89,13 +112,7 @@ csv_file *read_csv_file(const char *filename, const char delimiter)
                 size_t col_count = 0;
                 size_t row_count = 0;
 
-                size_t ch;
-                while (!feof(fp)) {
-                        ch = fgetc(fp);
-                        if (ch == '\n') {
-                                row_count++;
-                        }
-                }
+                row_count = count_lines(fp);
                 rewind(fp);
                 row_count--; // Count header
 

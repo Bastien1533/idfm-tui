@@ -17,7 +17,7 @@ void insert_edge(struct node **vertices, size_t from_stop_idx,
 
         bool dup = false;
         while (curr != NULL) {
-                if (curr->stop->idx == from_stop_idx) {
+                if (curr->stop->idx == to_stop->idx) {
                         dup = true;
                         break;
                 }
@@ -233,17 +233,21 @@ void update_transfers_from_pathways(struct pathway **pathways,
 
         size_t n_cache = 0;
 
-        for (size_t i = 0; i < n_transfers; i++) {
-                struct transfer *base_t = transfers[i];
+        size_t *dist_arr = NULL;
+        size_t *pred_arr = NULL;
+        struct pathway **pred_path_arr = NULL;
+        dist_arr = calloc(graph->n_vert, sizeof(size_t));
+        pred_arr = calloc(graph->n_vert, sizeof(size_t));
+        pred_path_arr = calloc(graph->n_vert, sizeof(struct pathway *));
+
+        for (size_t stop_idx = 0; stop_idx < n_stops; stop_idx++) {
+                if (buckets_len[stop_idx] == 0 ||
+                    graph->vertices[stop_idx] == NULL)
+                        continue;
+                struct transfer *base_t = buckets[stop_idx][0];
                 if (base_t == NULL || base_t->steps != NULL)
                         continue;
 
-                size_t *dist_arr = NULL;
-                size_t *pred_arr = NULL;
-                struct pathway **pred_path_arr = NULL;
-                dist_arr = calloc(graph->n_vert, sizeof(size_t));
-                pred_arr = calloc(graph->n_vert, sizeof(size_t));
-                pred_path_arr = calloc(graph->n_vert, sizeof(struct pathway *));
                 djikstra_get_detailled_transfer(base_t, graph, dist_arr,
                                                 pred_arr, pred_path_arr);
 
@@ -252,18 +256,6 @@ void update_transfers_from_pathways(struct pathway **pathways,
                         struct transfer *t = buckets[base_t->from_stop->idx][i];
                         if (t == NULL)
                                 continue;
-
-                        struct stop *from_dstop =
-                                hash_map_get(stop_map, t->from_stop->stop_id);
-                        struct stop *to_dstop =
-                                hash_map_get(stop_map, t->to_stop->stop_id);
-
-                        if (from_dstop != NULL && to_dstop != NULL) {
-                                // printf("%s %s (%s) to %s %s (%s)\n", from_dstop->stop_name,
-                                // from_dstop->route_long_name, t->from_stop->stop_id,
-                                // t->to_stop->stop_name, to_dstop->route_long_name,
-                                // t->to_stop->stop_id);
-                        }
 
                         size_t idx = t->to_stop->idx;
                         if (dist_arr[idx] == UINT_MAX) {
@@ -322,13 +314,13 @@ void update_transfers_from_pathways(struct pathway **pathways,
                         }
                         // printf("-----------------\n");
                 }
-                if (dist_arr != NULL)
-                        free(dist_arr);
-                if (pred_arr != NULL)
-                        free(pred_arr);
-                if (pred_path_arr != NULL)
-                        free(pred_path_arr);
         }
+        if (dist_arr != NULL)
+                free(dist_arr);
+        if (pred_arr != NULL)
+                free(pred_arr);
+        if (pred_path_arr != NULL)
+                free(pred_path_arr);
 }
 
 void free_pathway_graph(struct node **pathway_graph, size_t n_stops)

@@ -81,15 +81,13 @@ int csv_col_index(csv_file *csv, const char *name)
         return -1;
 }
 
-unsigned long int gtfs_time_from_midnight(const char *time_string)
+unsigned long int gtfs_time_from_midnight(const char *s)
 {
-        if (!time_string || *time_string == '\0')
+        if (!s || s[0] == '\0' || s[2] != ':' || s[5] != ':')
                 return 0;
 
-        unsigned int hours = 0, minutes = 0, seconds = 0;
-        if (sscanf(time_string, "%u:%u:%u", &hours, &minutes, &seconds) == 3) {
-                return ((unsigned long)hours * 3600) + (minutes * 60) +
-                       (seconds);
-        }
-        return 0;
+        unsigned long h = (s[0] - '0') * 10 + (s[1] - '0');
+        unsigned long m = (s[3] - '0') * 10 + (s[4] - '0');
+        unsigned long sec = (s[6] - '0') * 10 + (s[7] - '0');
+        return h * 3600 + m * 60 + sec;
 }
