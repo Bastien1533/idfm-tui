@@ -13,7 +13,7 @@ void send_shape_res_ui(int pipe_fd, int request_seq, shape_res *res);
 
 void send_stop_req_logic(int pipe_fd, int request_seq, char *stop_name);
 void send_itinerary_req_logic(int pipe_fd, int request_seq, char *dep_stop_id,
-                              char *arr_stop_id);
+                              char *arr_stop_id, unsigned long dep_time);
 void send_shape_req_logic(int pipe_fd, int request_seq);
 void send_itinerary_shape_req_logic(int pipe_fd, int request_seq,
                                     struct raptor_itinerary *itinerary);

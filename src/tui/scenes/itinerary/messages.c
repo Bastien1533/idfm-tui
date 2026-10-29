@@ -1,4 +1,3 @@
-#include "data/gtfs.h"
 #include "map/shapes.h"
 #include "tui/ui/map.h"
 #include <stdarg.h>
@@ -43,7 +42,7 @@ static void receive_map(scene_t *scene, ui_message *message)
         unsigned rows, cols;
         ncplane_dim_yx(scene->plane, &rows, &cols);
 
-        const unsigned pad = 1;
+        const unsigned pad = 3;
         const unsigned left = 30; //inputs/buttons width
         unsigned sel_w = 0;
 
@@ -235,5 +234,6 @@ void itinerary_send_itinerary_req(void *payload)
         scene->parent_ctx->ipc.request_seq++;
         send_itinerary_req_logic(scene->parent_ctx->ipc.pipe_logic_w,
                                  scene->parent_ctx->ipc.request_seq,
-                                 i_ctx->dep_stop_id, i_ctx->arr_stop_id);
+                                 i_ctx->dep_stop_id, i_ctx->arr_stop_id,
+                                 i_ctx->sel_dep_time);
 }

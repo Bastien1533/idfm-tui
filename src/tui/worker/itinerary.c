@@ -95,7 +95,7 @@ struct itinerary_res *get_itinerary(logic_task_itinerary_req *request,
                 /*printf("%s -> %s\n", dep->stop->stop_name,
                        arr->stop->stop_name); */
                 res = raptor_algo(n_raptor_routes, raptor_stops, n_raptor_stops,
-                                  9 * 3600, dep, arr);
+                                  request->dep_time, dep, arr);
                 if (res == NULL) {
                         return NULL;
                 }

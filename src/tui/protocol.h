@@ -62,6 +62,7 @@ typedef enum {
 typedef struct logic_task_itinerary_req {
         char *dep_id;
         char *arr_id;
+        unsigned long dep_time;
 } logic_task_itinerary_req;
 
 typedef struct logic_task_stop_req {

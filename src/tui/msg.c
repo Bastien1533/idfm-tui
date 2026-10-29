@@ -124,13 +124,14 @@ void send_itinerary_shape_req_logic(int pipe_fd, int request_seq,
 }
 
 void send_itinerary_req_logic(int pipe_fd, int request_seq, char *dep_stop_id,
-                              char *arr_stop_id)
+                              char *arr_stop_id, unsigned long dep_time)
 {
         logic_task_req *message = malloc(sizeof(logic_task_req));
         if (message) {
                 message->type = LOGIC_TASK_ITINERARY_REQ;
                 message->itinerary_req.dep_id = dep_stop_id;
                 message->itinerary_req.arr_id = arr_stop_id;
+                message->itinerary_req.dep_time = dep_time;
                 message->seq = request_seq;
                 write(pipe_fd, &message, sizeof(logic_task_req *));
         }

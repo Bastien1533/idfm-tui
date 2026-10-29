@@ -57,6 +57,15 @@ char *print_hhmmss(unsigned long sec)
         return res;
 }
 
+char *print_hhmm(unsigned long sec)
+{
+        unsigned long h = (sec / 3600) % 24;
+        unsigned long m = (sec % 3600) / 60;
+        char *res = NULL;
+        asprintf(&res, "%02lu:%02lu", h, m);
+        return res;
+}
+
 void clear_array(void *array, size_t len, size_t elem_size)
 {
         memset(array, 0, len * elem_size);

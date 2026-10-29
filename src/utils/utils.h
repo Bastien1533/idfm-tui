@@ -11,6 +11,7 @@ bool string_eq(char *a, char *b);
 unsigned long int gtfs_time_from_midnight(const char *time_string);
 int csv_col_index(csv_file *csv, const char *name);
 char *print_hhmmss(unsigned long sec);
+char *print_hhmm(unsigned long sec);
 void clear_array(void *array, size_t len, size_t elem_size);
 unsigned long min_int(unsigned long a, unsigned long b);
 #endif

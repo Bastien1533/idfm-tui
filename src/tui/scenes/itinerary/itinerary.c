@@ -1,13 +1,12 @@
-
-#include "map/map.h"
-#include "tui/protocol.h"
-#include "tui/ui/map.h"
 #include <stdarg.h>
 #include <stddef.h>
 #include <stdlib.h>
 #include <stdbool.h>
 #include <notcurses/notcurses.h>
 #include <string.h>
+#include "map/map.h"
+#include "utils/utils.h"
+#include "tui/ui/map.h"
 #include "tui/ui/button.h"
 #include "tui/ui/input.h"
 #include "tui/ui/selector.h"
@@ -98,6 +97,7 @@ void scene_itinerary_on_enter(scene_t *scene)
         add_button(scene->plane, &scene->ctx->buttons, &scene->ctx->n_buttons,
                    scene->ctx->button_map, &btn_opts, "Back to Menu");
 
+        itinerary_ctx *itinerary_ctx = scene->payload;
         for (size_t i = 0; i < 10; i += 5) {
                 ui_input_opts ipt_opts = {
                         .x = 0,
@@ -114,7 +114,7 @@ void scene_itinerary_on_enter(scene_t *scene)
                                           &scene->ctx->n_inputs, &ipt_opts);
                 if (ipt == NULL)
                         continue;
-                itinerary_ctx *itinerary_ctx = scene->payload;
+
                 ui_selector_opts sel_opts = { .x = 31,
                                               .y = 0,
                                               .cols = 200,
@@ -132,6 +132,25 @@ void scene_itinerary_on_enter(scene_t *scene)
                                                 &scene->ctx->n_selectors,
                                                 &sel_opts, false);
                 ipt->child_selector = sel;
+        }
+
+        ui_input_opts ipt_opts = {
+                .x = 0,
+                .y = 10,
+                .cols = 30,
+                .rows = 3,
+                .id = "time",
+                .onsubmit = itinerary_set_dep_time,
+                .onsubmit_payload = scene,
+                .ontype = NULL,
+                .ontype_payload = scene->ctx,
+        };
+        ui_input *ipt = add_input(scene->plane, &scene->ctx->inputs,
+                                  &scene->ctx->n_inputs, &ipt_opts);
+        if (ipt) {
+                char *time_str = print_hhmm(itinerary_ctx->sel_dep_time);
+                set_input_text(ipt, time_str);
+                free(time_str);
         }
         return;
 }
@@ -190,6 +209,7 @@ scene_t *create_itinerary_scene(struct notcurses *nc,
                 destroy_scene(scene);
                 return NULL;
         }
+        itinerary_payload->sel_dep_time = 8 * 3600;
 
         scene->type = UI_ITINERARY_SCENE;
         scene->ctx = ctx;

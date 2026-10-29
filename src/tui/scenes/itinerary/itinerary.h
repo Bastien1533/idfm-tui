@@ -16,6 +16,7 @@ typedef struct stop_req_payload {
 typedef struct itinerary_ctx {
         char *dep_stop_id;
         char *arr_stop_id;
+        unsigned long sel_dep_time;
         itinerary_res *itinerary_req_result;
 
         ui_selector *itinerary_res_selector;
@@ -40,5 +41,6 @@ void itinerary_show_itinerary_as_selector(ui_selector *prev_selector,
 
 void itinerary_on_stop_select(ui_selector *, void *);
 void itinerary_format_raptor_selector(struct raptor_itinerary *, ui_selector *);
+void itinerary_set_dep_time(ui_input *ipt, void *payload);
 
 #endif
