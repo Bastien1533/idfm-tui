@@ -38,5 +38,4 @@ void set_bg_color(struct ncplane *plane, uint64_t ch)
         if (!fg_defined(ch))
                 ncchannels_set_fg_rgb(&ch, RATP_DEEP_BLUE);
         ncplane_set_base(plane, " ", 0, ch);
-        ncplane_erase(plane);
 }

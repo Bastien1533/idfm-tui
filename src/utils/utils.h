@@ -3,6 +3,7 @@
 #include "utils/csv.h"
 #include "data/dataset.h"
 #include <stdbool.h>
+#include <stddef.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -14,4 +15,5 @@ char *print_hhmmss(unsigned long sec);
 char *print_hhmm(unsigned long sec);
 void clear_array(void *array, size_t len, size_t elem_size);
 unsigned long min_int(unsigned long a, unsigned long b);
+size_t stmod(size_t a, size_t b);
 #endif

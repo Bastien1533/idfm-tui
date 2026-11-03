@@ -40,7 +40,7 @@ static enum route_mode route_type_to_mode(unsigned short rt)
         case 1:
                 return METRO;
         case 2:
-                return RAIL;
+                return COMMUTER_RAIL;
         case 3:
                 return BUS;
         case 5:

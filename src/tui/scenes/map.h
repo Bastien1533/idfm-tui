@@ -1,6 +1,8 @@
 #ifndef TUI_MAP_SCENE_H
 #define TUI_MAP_SCENE_H
 
+#include "tui/ui/button_selector.h"
+#include <stdint.h>
 #include <stdlib.h>
 #include <stdbool.h>
 #include <notcurses/notcurses.h>
@@ -10,6 +12,9 @@
 typedef struct ui_ctx ui_ctx;
 
 typedef struct map_ctx {
+        uint32_t included_modes;
+        ui_btn_selector *sel;
+        bool selector_focused;
         ui_map *map;
         size_t pending_seq;
 } map_ctx;

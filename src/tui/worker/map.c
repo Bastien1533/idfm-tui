@@ -29,6 +29,9 @@ static size_t filter_trips(struct trip **trips, size_t n_trips,
 
         for (size_t i = 0; i < n_trips; i++) {
                 struct trip *t = trips[i];
+                if (t->route && req.included_modes != 0 &&
+                    (req.included_modes & t->route->mode) == 0)
+                        continue;
 
                 if (hash_map_get(included_trips, t->trip_id) != NULL &&
                     hash_map_get(excluded_trips, t->trip_id) == NULL)

@@ -1,6 +1,7 @@
 #include "data/dataset.h"
 #include "data/rules.h"
 #include <stdbool.h>
+#include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -64,6 +65,11 @@ char *print_hhmm(unsigned long sec)
         char *res = NULL;
         asprintf(&res, "%02lu:%02lu", h, m);
         return res;
+}
+
+size_t stmod(long a, long b)
+{
+        return (a % b + b) % b;
 }
 
 void clear_array(void *array, size_t len, size_t elem_size)

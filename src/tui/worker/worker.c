@@ -57,16 +57,16 @@ void init_worker(int ui_pipe_fd, worker_data *data)
 {
         /* --- agencies -> routes --- */
         send_log_ui_message(ui_pipe_fd, "Reading %s...\n",
-                            "data/gtfs2/agency.txt");
-        csv_file *csv_a = read_csv_file("data/gtfs2/agency.txt", ',');
+                            "data/gtfs/agency.txt");
+        csv_file *csv_a = read_csv_file("data/gtfs/agency.txt", ',');
         size_t n_agencies = 0;
         data->agencies = get_agencies_from_csv(csv_a, &n_agencies);
         data->agency_map = agencies_to_map(data->agencies, &n_agencies);
         data->n_agencies = n_agencies;
 
         send_log_ui_message(ui_pipe_fd, "Reading %s...\n",
-                            "data/gtfs2/routes.txt");
-        csv_file *csv_r = read_csv_file("data/gtfs2/routes.txt", ',');
+                            "data/gtfs/routes.txt");
+        csv_file *csv_r = read_csv_file("data/gtfs/routes.txt", ',');
         size_t n_routes = 0;
         data->routes = get_routes_from_csv(csv_r, &n_routes, data->agency_map);
         data->route_map = routes_to_map(data->routes, &n_routes);
@@ -74,8 +74,8 @@ void init_worker(int ui_pipe_fd, worker_data *data)
 
         /* --- trips -> trip_map --- */
         send_log_ui_message(ui_pipe_fd, "Reading %s...\n",
-                            "data/gtfs2/trips.txt");
-        csv_file *csv_t = read_csv_file("data/gtfs2/trips.txt", ',');
+                            "data/gtfs/trips.txt");
+        csv_file *csv_t = read_csv_file("data/gtfs/trips.txt", ',');
         size_t n_trips = 0;
         data->trips = get_trips_from_csv(csv_t, &n_trips, data->route_map);
         data->trip_map = trips_to_map(data->trips, &n_trips, n_trips * 4);
@@ -84,8 +84,8 @@ void init_worker(int ui_pipe_fd, worker_data *data)
 
         /* --- stops -> stop_map --- */
         send_log_ui_message(ui_pipe_fd, "Reading %s...\n",
-                            "data/gtfs2/stops.txt");
-        csv_file *csv_s = read_csv_file("data/gtfs2/stops.txt", ',');
+                            "data/gtfs/stops.txt");
+        csv_file *csv_s = read_csv_file("data/gtfs/stops.txt", ',');
         size_t n_stops = 0;
         data->stops = get_stops_from_csv(csv_s, &n_stops);
         data->stop_map = stops_to_map(data->stops, &n_stops);
@@ -93,8 +93,8 @@ void init_worker(int ui_pipe_fd, worker_data *data)
 
         /* --- transfers --- */
         send_log_ui_message(ui_pipe_fd, "Reading %s...\n",
-                            "data/gtfs2/transfers.txt");
-        csv_file *csv_x = read_csv_file("data/gtfs2/transfers.txt", ',');
+                            "data/gtfs/transfers.txt");
+        csv_file *csv_x = read_csv_file("data/gtfs/transfers.txt", ',');
         size_t n_transfers = 0;
         data->transfers =
                 get_transfers_from_csv(csv_x, &n_transfers, data->stop_map);
@@ -107,8 +107,8 @@ void init_worker(int ui_pipe_fd, worker_data *data)
 
         /* --- pathways -> populate transfer steps --- */
         send_log_ui_message(ui_pipe_fd, "Reading %s...\n",
-                            "data/gtfs2/pathways.txt");
-        csv_file *csv_p = read_csv_file("data/gtfs2/pathways.txt", ',');
+                            "data/gtfs/pathways.txt");
+        csv_file *csv_p = read_csv_file("data/gtfs/pathways.txt", ',');
         size_t n_pathways = 0;
         data->pathways =
                 get_pathways_from_csv(csv_p, &n_pathways, data->stop_map);
@@ -121,8 +121,8 @@ void init_worker(int ui_pipe_fd, worker_data *data)
 
         /* --- stop_times --- */
         send_log_ui_message(ui_pipe_fd, "Reading %s...\n",
-                            "data/gtfs2/stop_times.txt");
-        csv_file *csv_st = read_csv_file("data/gtfs2/stop_times.txt", ',');
+                            "data/gtfs/stop_times.txt");
+        csv_file *csv_st = read_csv_file("data/gtfs/stop_times.txt", ',');
         size_t n_stop_times = 0;
         data->stop_times = get_stop_times_from_csv(
                 csv_st, &n_stop_times, data->trip_map, data->stop_map);
@@ -139,8 +139,8 @@ void init_worker(int ui_pipe_fd, worker_data *data)
 
         /* --- shapes --- */
         send_log_ui_message(ui_pipe_fd, "Reading %s...\n",
-                            "data/gtfs2/shapes.txt");
-        csv_file *csv_sh = read_csv_file("data/gtfs2/shapes.txt", ',');
+                            "data/gtfs/shapes.txt");
+        csv_file *csv_sh = read_csv_file("data/gtfs/shapes.txt", ',');
         size_t n_shapes = 0;
         double lat_ref;
         data->shapes = get_shapes_from_csv(csv_sh, &n_shapes, &lat_ref);
@@ -173,6 +173,10 @@ void init_worker(int ui_pipe_fd, worker_data *data)
         data->raptor_stop_map =
                 raptor_stops_to_map(data->raptor_stops, &n_stops_built);
         send_log_ui_message(ui_pipe_fd, "raptor stop map built\n");
+
+        gtfs_apply_rules(data->routes, data->n_routes);
+        send_log_ui_message(ui_pipe_fd, "Applied gtfs rules\n");
+
         send_init_finished_message(ui_pipe_fd);
 
         free_csv(csv_a);

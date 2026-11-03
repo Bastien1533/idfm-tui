@@ -86,14 +86,13 @@ struct shape_style style_stop(const struct stop *s)
         get_stop_min_max_scale(s->location_type, s->stop_role, &min_scale,
                                &max_scale);
         bool label = s->location_type == STATION ? true : false;
-        struct shape_style style = {
-                .label = label,
-                .color = color,
-                .max_scale = max_scale,
-                .min_scale = min_scale,
-                .radius = radius,
-                .z_index = 2,
-        };
+        struct shape_style style = { .label = label,
+                                     .color = color,
+                                     .max_scale = max_scale,
+                                     .min_scale = min_scale,
+                                     .radius = radius,
+                                     .z_index = 2,
+                                     .ch_s = "◉" };
         return style;
 }
 
@@ -102,13 +101,12 @@ struct shape_style style_route(const struct route *r)
         uint32_t color = (uint32_t)((r && r->route_color[0]) ?
                                             strtoul(r->route_color, NULL, 16) :
                                             0xFFFFFF);
-        struct shape_style style = {
-                .label = false,
-                .color = color,
-                .max_scale = -1,
-                .min_scale = -1,
-                .radius = -1,
-                .z_index = 1,
-        };
+        struct shape_style style = { .label = false,
+                                     .color = color,
+                                     .max_scale = -1,
+                                     .min_scale = -1,
+                                     .radius = -1,
+                                     .z_index = r->mode == BUS ? 0 : 1,
+                                     .ch_s = r->mode == BUS ? "•" : "●" };
         return style;
 }

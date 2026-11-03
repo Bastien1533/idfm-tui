@@ -10,7 +10,6 @@ void ui_draw_map(ui_map *map)
 {
         draw_map(map->opts->n_shapes, map->opts->shapes, map->view, &map->cells,
                  map->plane);
-        notcurses_render(map->nc);
         memset(map->cells, 0,
                (size_t)map->opts->rows * map->opts->cols *
                        sizeof(struct map_cell));

@@ -32,6 +32,7 @@ void map_print_frame(struct map_view *view, struct map_cell *cells,
 void map_print_frame_nc(struct map_view *view, struct map_cell *cells,
                         size_t n_cells, struct ncplane *plane)
 {
+        ncplane_erase(plane);
         for (size_t y = 0; y < view->rows; y++) {
                 for (size_t x = 0; x < view->cols; x++) {
                         struct map_cell *cell = cells + (y * view->cols) + x;

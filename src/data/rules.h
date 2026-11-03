@@ -9,18 +9,18 @@ typedef struct route route;
 typedef struct stop stop;
 
 enum route_mode {
-        BUS,
-        METRO,
-        TRAMWAY,
-        CABLE,
-        COMMUTER_RAIL,
-        REGIONAL_RAIL,
-        RAIL,
-        HS_RAIL,
-        AIRPORT_RAIL,
-        FUNICULAR,
-        TAXI,
-        UNKNOWN
+        BUS = 1 << 0,
+        METRO = 1 << 1,
+        TRAMWAY = 1 << 2,
+        CABLE = 1 << 3,
+        COMMUTER_RAIL = 1 << 4,
+        REGIONAL_RAIL = 1 << 5,
+        RAIL = 1 << 6,
+        HS_RAIL = 1 << 7,
+        AIRPORT_RAIL = 1 << 8,
+        FUNICULAR = 1 << 9,
+        TAXI = 1 << 10,
+        UNKNOWN = 1 << 11,
 };
 
 enum location_type {

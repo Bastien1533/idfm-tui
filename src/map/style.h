@@ -18,6 +18,7 @@ struct shape_style {
         int max_scale;
         bool label;
         double z_index;
+        char *ch_s;
 };
 
 struct shape_style style_stop(const struct stop *s);

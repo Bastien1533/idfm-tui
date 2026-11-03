@@ -1,4 +1,5 @@
 #include "algo/raptor.h"
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -96,13 +97,14 @@ void send_stop_req_logic(int pipe_fd, int request_seq, char *stop_name)
         }
 }
 
-void send_shape_req_logic(int pipe_fd, int request_seq)
+void send_shape_req_logic(int pipe_fd, int request_seq, uint32_t included_modes)
 {
         logic_task_req *message = malloc(sizeof(logic_task_req));
         if (message) {
                 message->type = LOGIC_TASK_SHAPES_REQ;
                 message->seq = request_seq;
                 struct logic_task_shape_req shape_req = { 0 };
+                shape_req.included_modes = included_modes;
                 message->shape_req = shape_req;
                 write(pipe_fd, &message, sizeof(logic_task_req *));
         }

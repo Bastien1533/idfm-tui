@@ -5,6 +5,7 @@
 #include "map/shapes.h"
 #include <stddef.h>
 #include <notcurses/notcurses.h>
+#include <stdint.h>
 
 typedef enum {
         UI_MSG_LOG,
@@ -75,6 +76,7 @@ typedef struct logic_task_shape_req {
         size_t n_include_trips;
         struct trip **exclude_trips;
         size_t n_exclude_trips;
+        uint32_t included_modes;
 } logic_task_shape_req;
 
 typedef struct logic_task_itinerary_shape_req {
