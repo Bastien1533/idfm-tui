@@ -195,7 +195,6 @@ void handle_map_scene_input(scene_t *self, const ncinput *ni, uint32_t key)
 
         struct map_ctx *m_ctx = self->payload;
 
-
         bool is_repeat = (ni->evtype == NCTYPE_REPEAT);
         bool is_release = (ni->evtype == NCTYPE_RELEASE);
         bool is_in_sel = (m_ctx != NULL && m_ctx->sel != NULL) &&
@@ -221,19 +220,16 @@ void handle_map_scene_input(scene_t *self, const ncinput *ni, uint32_t key)
                 return;
         }
 
-        if (key == NCKEY_BUTTON1 && is_in_sel)
-        {
-            m_ctx->selector_focused = true;
-            set_selector_focused(m_ctx->sel);
+        if (key == NCKEY_BUTTON1 && is_in_sel) {
+                m_ctx->selector_focused = true;
+                set_selector_focused(m_ctx->sel);
+        } else if (key == NCKEY_BUTTON1 && is_in_map) {
+                m_ctx->selector_focused = false;
+                set_selector_unfocused(m_ctx->sel);
         }
-        else if (key == NCKEY_BUTTON1 && is_in_map)
-        {
-            m_ctx->selector_focused = false;
-            set_selector_unfocused(m_ctx->sel);
-        }
-        
+
         if (m_ctx != NULL && m_ctx->sel != NULL && m_ctx->selector_focused) {
-            handle_btn_selector_input(m_ctx->sel, ni, key);
+                handle_btn_selector_input(m_ctx->sel, ni, key);
         }
         if (m_ctx != NULL && m_ctx->map != NULL && !m_ctx->selector_focused) {
                 handle_map_input(ni, key, &m_ctx->map->view);
