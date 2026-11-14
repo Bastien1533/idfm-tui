@@ -6,37 +6,40 @@
 #include <stddef.h>
 #include <stdint.h>
 
-typedef struct ui_btn_selector_item {
-        char *id;
-        char *desc;
+typedef struct ui_btn_selector_item
+{
+    char *id;
+    char *desc;
 } ui_btn_selector_item;
 
-typedef struct ui_btn_selector_opts {
-        int x;
-        int y;
+typedef struct ui_btn_selector_opts
+{
+    int x;
+    int y;
 
-        size_t rows;
-        size_t cols;
+    size_t rows;
+    size_t cols;
 
-        char *id;
+    char *id;
 
-        size_t pad;
-        size_t n_items;
-        ui_btn_selector_item *items;
+    size_t pad;
+    size_t n_items;
+    ui_btn_selector_item *items;
 
-        void (*onselect)(char *id, void *arg);
-        void *onselect_payload;
+    void (*onselect)(char *id, void *arg);
+    void *onselect_payload;
 
-        uint64_t selection_bitmask;
-        int64_t hovered;
-        bool is_radio;
+    uint64_t selection_bitmask;
+    int64_t hovered;
+    bool is_radio;
 } ui_btn_selector_opts;
 
-typedef struct ui_btn_selector {
-        struct ncplane **item_planes;
-        struct ncplane *plane;
-        struct ncplane *parent;
-        ui_btn_selector_opts *opts;
+typedef struct ui_btn_selector
+{
+    struct ncplane **item_planes;
+    struct ncplane *plane;
+    struct ncplane *parent;
+    ui_btn_selector_opts *opts;
 } ui_btn_selector;
 
 void get_btn_selector_size(ui_btn_selector_item *items, size_t n_items,

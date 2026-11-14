@@ -4,15 +4,17 @@
 #include "data/gtfs.h"
 #include "utils/hashmap.h"
 
-struct node {
-        struct stop *stop;
-        struct pathway *path;
-        struct node *next;
+struct node
+{
+    struct stop *stop;
+    struct pathway *path;
+    struct node *next;
 };
 
-struct pathway_graph {
-        struct node **vertices;
-        size_t n_vert;
+struct pathway_graph
+{
+    struct node **vertices;
+    size_t n_vert;
 };
 
 void update_transfers_from_pathways(struct pathway **pathways,

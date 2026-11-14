@@ -1,62 +1,68 @@
 #ifndef MAP_H
 #define MAP_H
 
+#include <notcurses/notcurses.h>
 #include <stddef.h>
 #include <stdint.h>
-#include <notcurses/notcurses.h>
 
 typedef struct worker_data worker_data;
 
-struct geo_pt {
-        double lat;
-        double lon;
+struct geo_pt
+{
+    double lat;
+    double lon;
 };
 
-struct flat_pt {
-        double x;
-        double y;
+struct flat_pt
+{
+    double x;
+    double y;
 };
 
-struct cell_pos {
-        int row;
-        int col;
+struct cell_pos
+{
+    int row;
+    int col;
 };
 
-struct map_cell {
-        uint32_t fg;
-        uint32_t bg;
-        uint32_t ch;
-        double min_scale;
-        double max_scale;
-        double z_index;
+struct map_cell
+{
+    uint32_t fg;
+    uint32_t bg;
+    uint32_t ch;
+    double min_scale;
+    double max_scale;
+    double z_index;
 };
 
-struct bbox {
-        double xmax;
-        double ymax;
+struct bbox
+{
+    double xmax;
+    double ymax;
 
-        double xmin;
-        double ymin;
+    double xmin;
+    double ymin;
 };
 
-struct map_view {
-        double cy;
-        double cx;
+struct map_view
+{
+    double cy;
+    double cx;
 
-        double origin_x;
-        double origin_y;
+    double origin_x;
+    double origin_y;
 
-        size_t rows;
-        size_t cols;
+    size_t rows;
+    size_t cols;
 
-        size_t u_rows;
-        size_t u_cols;
+    size_t u_rows;
+    size_t u_cols;
 
-        double aspect;
-        double scale;
-        double lat_ref;
+    double aspect;
+    double scale;
+    double lat_ref;
 
-        struct bbox view_box;
+    struct bbox view_box;
 };
 
 typedef struct flat_shape flat_shape;

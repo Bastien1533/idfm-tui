@@ -1,11 +1,12 @@
 #ifndef TUI_WORKER_ITINERARY_H
 #define TUI_WORKER_ITINERARY_H
 
-#include "tui/protocol.h"
-#include "data/gtfs.h"
-#include "algo/raptor.h"
-#include "utils/hashmap.h"
 #include <notcurses/notcurses.h>
+
+#include "algo/raptor.h"
+#include "data/gtfs.h"
+#include "tui/protocol.h"
+#include "utils/hashmap.h"
 
 struct itinerary_res *get_itinerary(logic_task_itinerary_req *request,
                                     struct raptor_stop **raptor_stops,

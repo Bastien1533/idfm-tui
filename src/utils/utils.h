@@ -1,11 +1,12 @@
 #ifndef UTILS_H
 #define UTILS_H
-#include "utils/csv.h"
-#include "data/dataset.h"
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdlib.h>
 #include <string.h>
+
+#include "data/dataset.h"
+#include "utils/csv.h"
 
 bool line_in_array(struct dataset_line **lines, char *stop_id, size_t n);
 bool string_eq(char *a, char *b);

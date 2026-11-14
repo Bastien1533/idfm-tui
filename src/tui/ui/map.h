@@ -1,39 +1,42 @@
 #ifndef MAP_UI_H
 #define MAP_UI_H
 
-#include "map/map.h"
-#include "map/shapes.h"
 #include <notcurses/notcurses.h>
 #include <stdarg.h>
 #include <stddef.h>
 
+#include "map/map.h"
+#include "map/shapes.h"
+
 typedef struct scene scene_t;
 typedef struct ui_map ui_map;
 
-typedef struct {
-        int x;
-        int y;
-        size_t cols;
-        size_t rows;
-        double lat_ref;
+typedef struct
+{
+    int x;
+    int y;
+    size_t cols;
+    size_t rows;
+    double lat_ref;
 
-        struct flat_shape *shapes;
-        size_t n_shapes;
+    struct flat_shape *shapes;
+    size_t n_shapes;
 
-        void (*handle_input)(ui_map *self, const ncinput *ni, uint32_t key);
+    void (*handle_input)(ui_map *self, const ncinput *ni, uint32_t key);
 
-        void (*onclick)(void *arg);
-        void *onclick_payload;
+    void (*onclick)(void *arg);
+    void *onclick_payload;
 } ui_map_opts;
 
-typedef struct ui_map {
-        struct ncplane *plane;
-        struct ncplane *parent;
-        struct map_cell *cells;
-        struct map_view view;
-        ui_map_opts *opts;
-        struct notcurses *nc;
-        bool focused;
+typedef struct ui_map
+{
+    struct ncplane *plane;
+    struct ncplane *parent;
+    struct map_cell *cells;
+    struct map_view view;
+    ui_map_opts *opts;
+    struct notcurses *nc;
+    bool focused;
 
 } ui_map;
 

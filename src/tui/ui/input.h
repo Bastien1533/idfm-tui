@@ -1,33 +1,36 @@
 #ifndef INPUT_H
 #define INPUT_H
 
-#include "tui/ui/selector.h"
 #include <notcurses/notcurses.h>
 #include <stdarg.h>
+
+#include "tui/ui/selector.h"
 
 struct scene;
 typedef struct ui_input ui_input;
 
-typedef struct {
-        int x;
-        int y;
-        size_t cols;
-        size_t rows;
+typedef struct
+{
+    int x;
+    int y;
+    size_t cols;
+    size_t rows;
 
-        char *id;
+    char *id;
 
-        void (*onsubmit)(ui_input *ipt, void *arg);
-        void *onsubmit_payload;
+    void (*onsubmit)(ui_input *ipt, void *arg);
+    void *onsubmit_payload;
 
-        void (*ontype)(ui_input *ipt, void *arg);
-        void *ontype_payload;
+    void (*ontype)(ui_input *ipt, void *arg);
+    void *ontype_payload;
 } ui_input_opts;
 
-typedef struct ui_input {
-        struct ncreader *reader;
-        struct ncplane *box_plane;
-        ui_input_opts *opts;
-        struct ui_selector *child_selector;
+typedef struct ui_input
+{
+    struct ncreader *reader;
+    struct ncplane *box_plane;
+    ui_input_opts *opts;
+    struct ui_selector *child_selector;
 } ui_input;
 
 void move_input(ui_input *btn, int x, int y);

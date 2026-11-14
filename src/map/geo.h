@@ -1,9 +1,9 @@
 #ifndef MAP_GEO_H
 #define MAP_GEO_H
 
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
-#include <stdbool.h>
 
 #include "data/gtfs.h"
 #include "map/map.h"

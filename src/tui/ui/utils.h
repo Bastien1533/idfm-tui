@@ -5,6 +5,7 @@
 #define RATP_BEIGE_WHITE 0xFCF4DC
 
 #include <notcurses/notcurses.h>
+
 #include "tui/ui/button.h"
 #include "tui/ui/input.h"
 

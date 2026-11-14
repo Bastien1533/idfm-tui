@@ -1,9 +1,9 @@
 #ifndef MAP_STYLE_H
 #define MAP_STYLE_H
 
+#include <notcurses/notcurses.h>
 #include <stddef.h>
 #include <stdint.h>
-#include <notcurses/notcurses.h>
 
 #include "data/gtfs.h"
 
@@ -11,14 +11,15 @@
 #define STOP_STATION_COLOR 0x66CCFF
 #define STOP_PLATFORM_COLOR 0xF2F2F2
 
-struct shape_style {
-        uint32_t color;
-        double radius;
-        int min_scale;
-        int max_scale;
-        bool label;
-        double z_index;
-        char *ch_s;
+struct shape_style
+{
+    uint32_t color;
+    double radius;
+    int min_scale;
+    int max_scale;
+    bool label;
+    double z_index;
+    char *ch_s;
 };
 
 struct shape_style style_stop(const struct stop *s);

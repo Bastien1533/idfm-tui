@@ -1,14 +1,16 @@
 #ifndef TUI_WORKER_SEARCH_H
 #define TUI_WORKER_SEARCH_H
 
-#include "tui/protocol.h"
-#include "data/gtfs.h"
 #include <notcurses/notcurses.h>
 
-struct matching_item {
-        int dist;
-        struct ncselector_item *item;
-        void *orig_item;
+#include "data/gtfs.h"
+#include "tui/protocol.h"
+
+struct matching_item
+{
+    int dist;
+    struct ncselector_item *item;
+    void *orig_item;
 };
 
 struct matching_item **perform_stop_search(logic_task_stop_req *request,

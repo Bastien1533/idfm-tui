@@ -1,12 +1,12 @@
 #ifndef MAP_UTILS_H
 #define MAP_UTILS_H
 
-#include "map/shapes.h"
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
 
 #include "map/map.h"
+#include "map/shapes.h"
 
 typedef struct flat_shape flat_shape;
 

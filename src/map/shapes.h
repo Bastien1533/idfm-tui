@@ -1,59 +1,71 @@
 #ifndef MAP_SHAPES_H
 #define MAP_SHAPES_H
 
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
-#include <stdbool.h>
 
-#include "data/gtfs.h"
 #include "algo/raptor.h"
+#include "data/gtfs.h"
 #include "map/map.h"
 #include "map/style.h"
 
 typedef struct shape gfts_shp;
 
-enum shape_type { LINE, CIRCLE, RECTANGLE, TEXT };
-
-struct line_shape {
-        struct flat_pt *pts;
-        size_t n_pts;
+enum shape_type
+{
+    LINE,
+    CIRCLE,
+    RECTANGLE,
+    TEXT
 };
 
-struct circle_shape {
-        double radius; //in cells
-        double mx;
-        double my;
+struct line_shape
+{
+    struct flat_pt *pts;
+    size_t n_pts;
 };
 
-struct rectangle_shape {
-        double xmax;
-        double ymax;
-
-        double xmin;
-        double ymin;
+struct circle_shape
+{
+    double radius; // in cells
+    double mx;
+    double my;
 };
 
-struct text_shape {
-        char *text;
-        double mx;
-        double my;
+struct rectangle_shape
+{
+    double xmax;
+    double ymax;
+
+    double xmin;
+    double ymin;
 };
 
-struct flat_shape {
-        enum shape_type type;
-        union {
-                struct rectangle_shape rect;
-                struct line_shape line;
-                struct circle_shape circle;
-                struct text_shape text;
-        } as;
-        struct bbox bbox;
-        uint32_t color;
+struct text_shape
+{
+    char *text;
+    double mx;
+    double my;
+};
 
-        double min_scale;
-        double max_scale;
-        double z_index;
-        char *ch_s;
+struct flat_shape
+{
+    enum shape_type type;
+    union
+    {
+        struct rectangle_shape rect;
+        struct line_shape line;
+        struct circle_shape circle;
+        struct text_shape text;
+    } as;
+    struct bbox bbox;
+    uint32_t color;
+
+    double min_scale;
+    double max_scale;
+    double z_index;
+    char *ch_s;
 };
 
 struct flat_shape gtfs_shape_to_flat(gfts_shp *shape, double lat_ref,
@@ -68,8 +80,8 @@ struct flat_shape *flat_shapes_from_trips(struct trip **trips, size_t n_trips,
                                           size_t *n_flat_shapes, size_t n_stops,
                                           double lat_ref);
 struct flat_shape *flat_shapes_from_itinerary(
-        struct raptor_itinerary *itinerary, struct hash_map *shape_map,
-        size_t n_shapes, size_t *n_flat_shapes, size_t n_stops, double lat_ref);
+    struct raptor_itinerary *itinerary, struct hash_map *shape_map,
+    size_t n_shapes, size_t *n_flat_shapes, size_t n_stops, double lat_ref);
 
 void free_flat_shapes(struct flat_shape *shapes, size_t n_shapes);
 

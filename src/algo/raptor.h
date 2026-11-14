@@ -3,69 +3,75 @@
 
 #include "data/gtfs.h"
 
-struct raptor_route_stop {
-        size_t pos_in_route;
-        struct stop *stop;
-        struct raptor_stop *rstop;
-        struct raptor_route *route;
+struct raptor_route_stop
+{
+    size_t pos_in_route;
+    struct stop *stop;
+    struct raptor_stop *rstop;
+    struct raptor_route *route;
 };
 
-struct raptor_route {
-        struct route *route;
+struct raptor_route
+{
+    struct route *route;
 
-        struct raptor_route_stop **route_stops;
-        struct stop_time ***stop_times;
+    struct raptor_route_stop **route_stops;
+    struct stop_time ***stop_times;
 
-        size_t n_trips;
-        size_t n_stops;
+    size_t n_trips;
+    size_t n_stops;
 
-        size_t idx;
+    size_t idx;
 };
 
-struct raptor_stop {
-        struct stop *stop;
-        struct transfer **transfers;
-        struct stop **childrens;
-        struct raptor_route_stop **routes_stops;
+struct raptor_stop
+{
+    struct stop *stop;
+    struct transfer **transfers;
+    struct stop **childrens;
+    struct raptor_route_stop **routes_stops;
 
-        size_t n_transfers;
-        size_t n_routes;
-        size_t n_chidrens;
+    size_t n_transfers;
+    size_t n_routes;
+    size_t n_chidrens;
 
-        size_t idx;
+    size_t idx;
 };
 
-struct raptor_leg {
-        struct raptor_stop *from;
-        struct raptor_stop *to;
-        struct trip *trip; // NULL if transfer/walk
-        struct transfer *transfer; // NULL if trip
-        unsigned long dep_time;
-        unsigned long arr_time;
+struct raptor_leg
+{
+    struct raptor_stop *from;
+    struct raptor_stop *to;
+    struct trip *trip; // NULL if transfer/walk
+    struct transfer *transfer; // NULL if trip
+    unsigned long dep_time;
+    unsigned long arr_time;
 };
-struct raptor_itinerary {
-        struct raptor_leg **legs;
-        size_t n_legs;
-        size_t n_trips;
-        size_t n_transfers;
-        unsigned long dep_time;
-        unsigned long arr_time;
+struct raptor_itinerary
+{
+    struct raptor_leg **legs;
+    size_t n_legs;
+    size_t n_trips;
+    size_t n_transfers;
+    unsigned long dep_time;
+    unsigned long arr_time;
 };
 
-struct raptor_result {
-        struct raptor_stop ***parent_stops;
-        struct trip ***parent_trips;
-        struct transfer ***parent_transfers;
-        unsigned long int *tau_star;
-        unsigned long int **tau_rounds;
-        size_t total_rounds;
+struct raptor_result
+{
+    struct raptor_stop ***parent_stops;
+    struct trip ***parent_trips;
+    struct transfer ***parent_transfers;
+    unsigned long int *tau_star;
+    unsigned long int **tau_rounds;
+    size_t total_rounds;
 
-        struct raptor_stop *dep;
-        struct raptor_stop *arr;
-        size_t departure_time;
+    struct raptor_stop *dep;
+    struct raptor_stop *arr;
+    size_t departure_time;
 
-        struct raptor_itinerary **itineraries;
-        size_t n_itineraries;
+    struct raptor_itinerary **itineraries;
+    size_t n_itineraries;
 };
 
 unsigned long dep(struct trip *t, struct stop *p);

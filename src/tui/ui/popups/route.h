@@ -1,8 +1,9 @@
 #ifndef POPUPS_ROUTE_H
 #define POPUPS_ROUTE_H
 
-#include "data/gtfs.h"
 #include <notcurses/notcurses.h>
+
+#include "data/gtfs.h"
 
 typedef struct scene scene_t;
 typedef struct ui_popup ui_popup;

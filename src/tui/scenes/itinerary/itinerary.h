@@ -1,29 +1,32 @@
 #ifndef TUI_ITINERARY_SCENE_H
 #define TUI_ITINERARY_SCENE_H
 
-#include <stdlib.h>
-#include <stdbool.h>
 #include <notcurses/notcurses.h>
-#include "tui/scenes/scenes.h"
+#include <stdbool.h>
+#include <stdlib.h>
+
 #include "tui/protocol.h"
+#include "tui/scenes/scenes.h"
 #include "tui/ui/map.h"
 
-typedef struct stop_req_payload {
-        scene_t *scene;
-        char *stop_name;
+typedef struct stop_req_payload
+{
+    scene_t *scene;
+    char *stop_name;
 } stop_req_payload;
 
-typedef struct itinerary_ctx {
-        char *dep_stop_id;
-        char *arr_stop_id;
-        unsigned long sel_dep_time;
-        itinerary_res *itinerary_req_result;
+typedef struct itinerary_ctx
+{
+    char *dep_stop_id;
+    char *arr_stop_id;
+    unsigned long sel_dep_time;
+    itinerary_res *itinerary_req_result;
 
-        ui_selector *itinerary_res_selector;
-        ui_selector *itinerary_detail_selector;
-        ui_map *map;
+    ui_selector *itinerary_res_selector;
+    ui_selector *itinerary_detail_selector;
+    ui_map *map;
 
-        size_t focused_itinerary_idx;
+    size_t focused_itinerary_idx;
 } itinerary_ctx;
 
 void free_itinerary_result(itinerary_res *r);

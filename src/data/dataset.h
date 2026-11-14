@@ -1,39 +1,42 @@
 #ifndef STOPS_H
 #define STOPS_H
 
-#include "utils/csv.h"
-#include "utils/hashmap.h"
-#include "data/rules.h"
 #include <stdlib.h>
 
-struct dataset_line {
-        char *route_id;
-        char *route_long_name;
-        char *operator_name;
-        char *short_name;
-        enum route_mode mode;
+#include "data/rules.h"
+#include "utils/csv.h"
+#include "utils/hashmap.h"
 
-        struct trip **trips;
-        size_t trip_count;
+struct dataset_line
+{
+    char *route_id;
+    char *route_long_name;
+    char *operator_name;
+    char *short_name;
+    enum route_mode mode;
 
-        struct dataset_stop **stops;
-        size_t stop_count;
+    struct trip **trips;
+    size_t trip_count;
+
+    struct dataset_stop **stops;
+    size_t stop_count;
 };
 
-struct dataset_stop {
-        char *stop_id;
-        char *stop_name;
-        float stop_lon;
-        float stop_lat;
-        char *pointgeo;
-        char *nom_commune;
-        char *code_insee;
+struct dataset_stop
+{
+    char *stop_id;
+    char *stop_name;
+    float stop_lon;
+    float stop_lat;
+    char *pointgeo;
+    char *nom_commune;
+    char *code_insee;
 
-        char *route_id;
-        char *route_long_name;
+    char *route_id;
+    char *route_long_name;
 
-        struct dataset_line **lines;
-        size_t line_count;
+    struct dataset_line **lines;
+    size_t line_count;
 };
 
 struct dataset_stop **get_dataset_stops_from_csv(csv_file *csv,

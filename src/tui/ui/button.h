@@ -3,27 +3,30 @@
 
 #include <notcurses/notcurses.h>
 #include <stdarg.h>
+
 #include "utils/hashmap.h"
 
-typedef struct {
-        int x;
-        int y;
-        size_t w;
-        size_t h;
+typedef struct
+{
+    int x;
+    int y;
+    size_t w;
+    size_t h;
 
-        char *id;
+    char *id;
 
-        void (*onclick)(void *arg);
-        void *onclick_payload;
+    void (*onclick)(void *arg);
+    void *onclick_payload;
 
-        void (*onhover)(void *arg);
-        void *onhover_payload;
+    void (*onhover)(void *arg);
+    void *onhover_payload;
 } ui_button_opts;
 
-typedef struct ui_button {
-        struct ncplane *plane;
-        struct ncplane *parent;
-        ui_button_opts *opts;
+typedef struct ui_button
+{
+    struct ncplane *plane;
+    struct ncplane *parent;
+    ui_button_opts *opts;
 } ui_button;
 
 void resize_btn(ui_button *btn, size_t h, size_t w);
