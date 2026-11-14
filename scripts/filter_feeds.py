@@ -128,8 +128,8 @@ def main() -> int:
     parser.add_argument(
         "--input",
         "-i",
-        default="feeds_v2.csv",
-        help="Path to the feeds CSV file (default: feeds_v2.csv)",
+        default="data/feeds_v2.csv",
+        help="Path to the feeds CSV file (default: data/feeds_v2.csv)",
     )
     parser.add_argument(
         "--preview-dir",

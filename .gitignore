@@ -4,4 +4,5 @@ main
 .vscode
 .DS_Store
 data/*
+!data/feeds_v2.csv
 *.pyc

@@ -3,7 +3,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
-CSV_FILE="${PROJECT_ROOT}/feeds_v2.csv"
+CSV_FILE="${PROJECT_ROOT}/data/feeds_v2.csv"
 PREVIEW_DIR="/tmp/idfm_gtfs_previews"
 FILTER_SCRIPT="${SCRIPT_DIR}/filter_feeds.py"
 
