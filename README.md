@@ -39,8 +39,7 @@ Use the interactive GTFS downloader to fetch and preview official feeds from aro
 ## Features
 
 - **RAPTOR Algorithm** (*Round-Based Public Transit Routing*)
-  - True multi-criteria Pareto optimization (travel time vs. number of transfers).
-  - Timetable-aware routing without graph edge-weight hacks.
+  - Searches the fastest route with for a defined number of connections.
 - **Terminal UI Architecture**
   - Built with **Notcurses**.
   - Multithreaded architecture separating the UI event loop from background worker logic via IPC pipes.
