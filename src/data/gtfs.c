@@ -313,7 +313,7 @@ void generate_missing_shapes(struct trip **trips, size_t n_trips,
                 t->route->route_id ? t->route->route_id : "unknown";
             const char *headsign = t->trip_headsign ? t->trip_headsign : "0";
 
-            asprintf(&synth_id, "synth_%s_%s_dir%u", route_id, headsign,
+            asprintf(&synth_id, "synth_%s_%s_dir%u", t->trip_id, headsign,
                      (unsigned int)t->direction_id);
 
             struct shape *existing = hash_map_get(shape_map, synth_id);
