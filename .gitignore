@@ -3,6 +3,5 @@ main
 .serena
 .vscode
 .DS_Store
-data/**/*.txt
-data/**/*.csv
+data/*
 *.pyc
