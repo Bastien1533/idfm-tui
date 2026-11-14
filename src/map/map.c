@@ -230,7 +230,8 @@ void map_render_loop(void)
     worker_data *wdata = calloc(1, sizeof(worker_data));
     if (wdata == NULL)
         return;
-    init_worker(1, wdata);
+    struct worker_opts wopts = { .gtfs_directory = "data/gtfs" };
+    init_worker(1, wdata, &wopts);
     size_t n_shapes = wdata->n_shapes;
 
     struct notcurses_options opts = { .flags = NCOPTION_SUPPRESS_BANNERS };
