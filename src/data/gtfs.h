@@ -1,150 +1,161 @@
 #ifndef GTFS_H
 #define GTFS_H
 
-#include "utils/csv.h"
-#include "utils/hashmap.h"
-#include "data/rules.h"
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdlib.h>
 
-struct agency {
-        char *agency_id;
-        char *agency_name;
-        char *agency_url;
-        char *agency_timezone;
-        char *agency_lang;
-        char *agency_phone;
-        char *agency_email;
-        char *agency_fare_url;
-        char *ticketing_deep_link_id;
+#include "data/rules.h"
+#include "utils/csv.h"
+#include "utils/hashmap.h"
+
+struct agency
+{
+    char *agency_id;
+    char *agency_name;
+    char *agency_url;
+    char *agency_timezone;
+    char *agency_lang;
+    char *agency_phone;
+    char *agency_email;
+    char *agency_fare_url;
+    char *ticketing_deep_link_id;
 };
 
-struct route {
-        char *route_id;
-        struct agency *agency;
-        char *route_short_name;
-        char *route_long_name;
-        char *route_desc;
-        unsigned short route_type;
-        enum route_mode mode;
-        char *route_url;
-        char *route_color;
-        char *route_text_color;
+struct route
+{
+    char *route_id;
+    struct agency *agency;
+    char *route_short_name;
+    char *route_long_name;
+    char *route_desc;
+    unsigned short route_type;
+    enum route_mode mode;
+    char *route_url;
+    char *route_color;
+    char *route_text_color;
 
-        struct hash_map *end_stop_freq;
-        struct stop **end_stops;
-        size_t n_end_stops;
+    struct hash_map *end_stop_freq;
+    struct stop **end_stops;
+    size_t n_end_stops;
 };
 
-struct stop {
-        char *stop_id;
-        unsigned short int stop_code;
-        char *stop_name;
-        char *stop_desc;
-        double stop_lon;
-        double stop_lat;
-        unsigned short int zone_id;
-        char *stop_url;
-        enum location_type location_type;
-        enum stop_role stop_role;
+struct stop
+{
+    char *stop_id;
+    unsigned short int stop_code;
+    char *stop_name;
+    char *stop_desc;
+    double stop_lon;
+    double stop_lat;
+    unsigned short int zone_id;
+    char *stop_url;
+    enum location_type location_type;
+    enum stop_role stop_role;
 
-        char *parent_station_id;
-        struct stop *parent_station;
+    char *parent_station_id;
+    struct stop *parent_station;
 
-        struct stop **child_stops;
-        size_t n_children;
+    struct stop **child_stops;
+    size_t n_children;
 
-        struct route **assoc_routes;
-        size_t n_assoc_routes;
+    struct route **assoc_routes;
+    size_t n_assoc_routes;
 
-        char *stop_timezone;
-        char *level_id;
-        unsigned short int wheelchair_boarding;
-        char *platform_code;
+    char *stop_timezone;
+    char *level_id;
+    unsigned short int wheelchair_boarding;
+    char *platform_code;
 
-        struct transfer **transfers;
-        size_t transfer_count;
+    struct transfer **transfers;
+    size_t transfer_count;
 
-        size_t idx;
+    size_t idx;
 };
 
-struct attribution {
-        char *attribution_id;
-        struct route *route;
-        char *trip_id;
-        unsigned short is_operator;
-        char *organization_name;
-        char *attribution_url;
-        char *attribution_email;
-        char *attribution_phone;
+struct attribution
+{
+    char *attribution_id;
+    struct route *route;
+    char *trip_id;
+    unsigned short is_operator;
+    char *organization_name;
+    char *attribution_url;
+    char *attribution_email;
+    char *attribution_phone;
 };
 
-struct shape_seq {
-        double shape_pt_lat;
-        double shape_pt_lon;
-        unsigned short shape_pt_sequence;
+struct shape_seq
+{
+    double shape_pt_lat;
+    double shape_pt_lon;
+    unsigned short shape_pt_sequence;
 };
 
-struct shape {
-        char *shape_id;
-        struct shape_seq **points;
-        size_t points_n;
+struct shape
+{
+    char *shape_id;
+    struct shape_seq **points;
+    size_t points_n;
 
-        struct route *route;
+    struct route *route;
 };
 
-struct trip {
-        struct route *route;
-        char *service_id;
-        char *trip_id;
-        char *trip_headsign;
-        char *trip_short_name;
-        size_t direction_id;
-        char *shape_id;
+struct trip
+{
+    struct route *route;
+    char *service_id;
+    char *trip_id;
+    char *trip_headsign;
+    char *trip_short_name;
+    size_t direction_id;
+    char *shape_id;
 
-        struct stop_time **stop_times;
-        size_t stop_time_count;
+    struct stop_time **stop_times;
+    size_t stop_time_count;
 };
 
-struct stop_time {
-        struct trip *trip;
-        struct stop *stop;
-        size_t departure_time;
-        size_t start_pickup_drop_off_window;
-        size_t arrival_time;
-        size_t end_pickup_drop_off_window;
-        size_t stop_sequence;
-        size_t pickup_type;
-        size_t drop_off_type;
+struct stop_time
+{
+    struct trip *trip;
+    struct stop *stop;
+    size_t departure_time;
+    size_t start_pickup_drop_off_window;
+    size_t arrival_time;
+    size_t end_pickup_drop_off_window;
+    size_t stop_sequence;
+    size_t pickup_type;
+    size_t drop_off_type;
 };
 
-struct transfer {
-        struct stop *from_stop;
-        struct stop *to_stop;
+struct transfer
+{
+    struct stop *from_stop;
+    struct stop *to_stop;
 
-        struct raptor_stop *to_rstop;
+    struct raptor_stop *to_rstop;
 
-        bool is_inter_parent_transfer;
-        unsigned short int transfer_type;
-        unsigned short int min_transfer_time;
+    bool is_inter_parent_transfer;
+    unsigned short int transfer_type;
+    unsigned short int min_transfer_time;
 
-        struct pathway **steps;
-        size_t n_steps;
+    struct pathway **steps;
+    size_t n_steps;
 };
 
-struct pathway {
-        char *pathway_id;
-        struct stop *from_stop;
-        struct stop *to_stop;
-        unsigned short int pathway_mode;
-        unsigned short int is_bidirectional;
-        double length;
-        unsigned short int traversal_time;
-        short int max_slope;
-        short int min_width;
-        char *signposted_as;
-        char *reversed_signposted_as;
+struct pathway
+{
+    char *pathway_id;
+    struct stop *from_stop;
+    struct stop *to_stop;
+    unsigned short int pathway_mode;
+    unsigned short int is_bidirectional;
+    double length;
+    unsigned short int traversal_time;
+    short int max_slope;
+    short int min_width;
+    char *signposted_as;
+    char *reversed_signposted_as;
 };
 
 struct agency **get_agencies_from_csv(csv_file *csv, size_t *n_agencies);
@@ -182,6 +193,9 @@ struct hash_map *transfers_to_map(struct transfer **transfers,
                                   size_t *n_transfers);
 struct hash_map *pathways_to_map(struct pathway **pathways, size_t *n_pathways);
 struct hash_map *shapes_to_map(struct shape **shapes, size_t *n_shapes);
+void generate_missing_shapes(struct trip **trips, size_t n_trips,
+                             struct hash_map *shape_map, struct shape ***shapes,
+                             size_t *n_shapes);
 struct hash_map *attributions_to_map(struct attribution **attributions,
                                      size_t *n_attribution);
 struct hash_map *routes_to_map(struct route **routes, size_t *n_routes);
