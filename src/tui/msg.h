@@ -6,6 +6,8 @@
 void send_erase_ui_message(int pipe_fd);
 void send_init_finished_message(int pipe_fd);
 void send_log_ui_message(int pipe_fd, const char *fmt, ...);
+void send_progress_ui_message(int pipe_fd, double progress, const char *fmt,
+                              ...);
 
 void send_search_res_ui(int pipe_fd, int request_seq, search_res *res);
 void send_itinerary_res_ui(int pipe_fd, int request_seq, itinerary_res *res);
